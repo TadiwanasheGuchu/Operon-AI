@@ -9,7 +9,7 @@ describe("navigation registry", () => {
   it("never exposes unimplemented modules", () => {
     const visible = visibleModules({ showInternal: true, can: all });
     expect(visible.every((m) => m.implemented)).toBe(true);
-    expect(visible.map((m) => m.id)).not.toContain("agents");
+    expect(visible.map((m) => m.id)).not.toContain("knowledge");
     expect(visible.map((m) => m.id)).toContain("integrations");
   });
 

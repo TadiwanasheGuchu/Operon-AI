@@ -91,7 +91,28 @@ This is the primary acceptance demonstration. The calculation is deterministic a
 | 3 — Integration infrastructure | Done, with live verification pending (see below) |
 | 4 — Intelligence and incidents | Done; Odoo-sourced live data and live AI providers not yet verified (see below) |
 | 5 — Workflow automation | Done; live Odoo and the Temporal runtime not yet verified (see below) |
-| 6 — AI assistant and first agent | Next |
+| 6 — AI assistant and first agent | Done with a scripted model; real-model evaluation pending a provider key |
+| 7 — Enterprise readiness | Next |
+
+Phase 6 notes (ADR 0014):
+- Built:
+  - The provider tool loop (Anthropic and OpenAI) and the controlled runner, enforcing the
+    allowlist, input validation, step, tool, token and time limits, and the monthly budget, with
+    a full step log.
+  - Seven typed tools; only one writes, and it drafts a request for approval.
+  - The assistant, with private conversations and answers checked against tool outputs.
+  - The inventory replenishment agent: acts for a named member, has a permission ceiling and
+    versioned settings, and runs daily or by hand.
+  - The real-model evaluation script.
+  - Web: the assistant drawer, the agents page (settings and run history) and the run log.
+- Acceptance results:
+  - Proven by tests with a scripted model: only allowlisted tools run; any write becomes an
+    approval request; planted instructions can't widen what a model does, even when it obeys
+    them; every run is reconstructable from its log (inputs, tool calls, outputs, model, tokens).
+  - "Injected instructions do not change agent behaviour (eval passes)" for a real model needs a
+    provider key: run `uv run python evals/run_agent_evals.py`.
+- Deferred: LangGraph (not needed for one bounded loop), marking runs interrupted by a crash as
+  stale (Phase 7), and per-organisation provider keys.
 
 Phase 5 notes (ADR 0012):
 - Built:

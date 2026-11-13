@@ -42,9 +42,11 @@ InsManage = Annotated[TenantContext, Depends(require_permission(Perm.INSIGHTS_MA
 OrgManage = Annotated[TenantContext, Depends(require_permission(Perm.ORGANISATION_MANAGE))]
 
 DATA_SHARED = (
-    "When on, each new or changed insight's title, evidence labels and values, recommendation, "
-    "assumptions and limitations are sent to the provider to write the explanation. Nothing "
-    "else is sent, and provider output is checked against the evidence before it is shown."
+    "When on, three things may use the provider. Explanations: each new or changed insight's "
+    "title, evidence, recommendation, assumptions and limitations are sent so the model can "
+    "rephrase them, and the output is checked against the evidence. Assistant: your question "
+    "and the records its read-only tools look up for you. Agents: the records their allowed "
+    "tools return. Nothing else is sent, and none of it can approve or change anything."
 )
 
 

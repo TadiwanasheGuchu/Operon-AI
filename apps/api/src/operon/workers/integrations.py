@@ -79,6 +79,7 @@ async def main() -> None:
             activities.sync_connection,
             intelligence.detect,
             intelligence.escalate,
+            intelligence.run_agents,
             purchase.advance_execution,
         ],
     )

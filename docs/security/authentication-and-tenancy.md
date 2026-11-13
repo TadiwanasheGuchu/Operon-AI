@@ -120,6 +120,22 @@ The suite was mutation-tested: removing the membership check makes it fail; remo
 | History is append-only: `workflow_execution_events` and `workflow_versions` have UPDATE, DELETE and TRUNCATE revoked | migration 0006 |
 | The cross-tenant sweep sees ids only (SECURITY DEFINER), then acts under each organisation's RLS context | `test_undecided_approvals_escalate_then_expire` |
 
+## Phase 6 additions (assistant and agents)
+
+| Control | Proof |
+|---|---|
+| Seven new tenant tables under RLS; every new route attacked with Org B's conversation and run ids | `test_tenant_isolation.py` |
+| Conversations are private to their author: restrictive RLS on `assistant_conversations` and `assistant_messages`, plus service checks | `test_conversations_are_private_at_the_database_level`, `test_assistant_tools_follow_the_askers_permissions` |
+| Assistant tools are read-only and filtered by the asker's permissions | `test_assistant_tools_follow_the_askers_permissions` |
+| Only allowlisted tools execute; unknown or disallowed calls are denied and logged | `test_injected_instructions_in_synced_data_change_nothing` |
+| Tool input is schema-validated before execution | `test_invalid_tool_input_is_rejected_before_running` |
+| An agent can never exceed its member's permissions or the fixed ceiling | `test_agent_is_capped_by_the_member_it_acts_for` |
+| Writes become approval requests; the member an agent acts for can't approve its drafts | `test_agent_drafts_a_request_that_still_needs_human_approval` |
+| Quantity bounds, severity threshold and per-run draft cap are enforced in code | `test_agent_guards_are_enforced_in_code` |
+| Step, token and time limits and the monthly budget stop runs | `test_runs_stop_at_their_limits`, `test_assistant_explains_why_it_is_unavailable` |
+| Answers citing records or figures not in the tool outputs are flagged to the reader | `test_unsupported_figures_and_references_are_flagged` |
+| Run logs are append-only (`agent_execution_steps`, `agent_versions`) | migration 0007 |
+
 ## Known gaps (tracked for later phases)
 
 - No breached-password check yet (planned: k-anonymity range lookup).

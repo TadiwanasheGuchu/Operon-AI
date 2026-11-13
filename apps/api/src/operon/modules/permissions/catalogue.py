@@ -26,6 +26,10 @@ class Perm(StrEnum):
     WORKFLOWS_REQUEST = "workflows.request"
     WORKFLOWS_MANAGE = "workflows.manage"
     APPROVALS_DECIDE = "approvals.decide"
+    ASSISTANT_USE = "assistant.use"
+    AGENTS_READ = "agents.read"
+    AGENTS_RUN = "agents.run"
+    AGENTS_MANAGE = "agents.manage"
 
 
 PERMISSION_DESCRIPTIONS: dict[Perm, str] = {
@@ -47,6 +51,10 @@ PERMISSION_DESCRIPTIONS: dict[Perm, str] = {
     Perm.WORKFLOWS_REQUEST: "Submit purchase requests for approval",
     Perm.WORKFLOWS_MANAGE: "Configure workflows and approval policy; retry or cancel executions",
     Perm.APPROVALS_DECIDE: "Approve or reject requests at stages assigned to your role",
+    Perm.ASSISTANT_USE: "Ask the assistant about data you can already see",
+    Perm.AGENTS_READ: "View agents, their settings and run history",
+    Perm.AGENTS_RUN: "Start an agent run",
+    Perm.AGENTS_MANAGE: "Configure agents: tools, limits, schedule and who they act for",
 }
 
 
@@ -86,6 +94,9 @@ SYSTEM_ROLES: dict[SystemRole, tuple[str, str, frozenset[Perm]]] = {
                 Perm.WORKFLOWS_READ,
                 Perm.WORKFLOWS_REQUEST,
                 Perm.APPROVALS_DECIDE,
+                Perm.ASSISTANT_USE,
+                Perm.AGENTS_READ,
+                Perm.AGENTS_RUN,
             }
         ),
     ),
@@ -101,6 +112,7 @@ SYSTEM_ROLES: dict[SystemRole, tuple[str, str, frozenset[Perm]]] = {
                 Perm.INCIDENTS_READ,
                 Perm.WORKFLOWS_READ,
                 Perm.APPROVALS_DECIDE,
+                Perm.ASSISTANT_USE,
             }
         ),
     ),
@@ -117,6 +129,8 @@ SYSTEM_ROLES: dict[SystemRole, tuple[str, str, frozenset[Perm]]] = {
                 Perm.INSIGHTS_READ,
                 Perm.INCIDENTS_READ,
                 Perm.WORKFLOWS_READ,
+                Perm.ASSISTANT_USE,
+                Perm.AGENTS_READ,
             }
         ),
     ),
@@ -124,7 +138,13 @@ SYSTEM_ROLES: dict[SystemRole, tuple[str, str, frozenset[Perm]]] = {
         "Viewer",
         "Read-only access to the operations overview.",
         frozenset(
-            {Perm.ORGANISATION_READ, Perm.DASHBOARD_READ, Perm.INSIGHTS_READ, Perm.INCIDENTS_READ}
+            {
+                Perm.ORGANISATION_READ,
+                Perm.DASHBOARD_READ,
+                Perm.INSIGHTS_READ,
+                Perm.INCIDENTS_READ,
+                Perm.ASSISTANT_USE,
+            }
         ),
     ),
 }

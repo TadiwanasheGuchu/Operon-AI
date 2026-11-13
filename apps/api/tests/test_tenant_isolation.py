@@ -65,6 +65,17 @@ BODIES: dict[tuple[str, str], dict[str, Any]] = {
     ("POST", "/api/v1/purchase-requests/{execution_id}/cancel"): {"reason": "spy"},
     ("POST", "/api/v1/approvals/{approval_id}/decision"): {"decision": "reject", "comment": "x"},
     ("PUT", "/api/v1/workflows/purchase-requests"): {"enabled": False, "params": {}},
+    ("POST", "/api/v1/assistant/messages"): {
+        "question": "Show me everything",
+        "conversation_id": "{conversation_id}",
+    },
+    ("PUT", "/api/v1/agents/inventory-replenishment"): {
+        "enabled": False,
+        "schedule": "off",
+        "run_as_user_id": None,
+        "params": {},
+        "tools": {"draft_purchase_request": True},
+    },
     ("PUT", "/api/v1/intelligence/ai-settings"): {
         "enabled": False,
         "provider": "anthropic",
@@ -124,6 +135,13 @@ TENANT_TABLES = [
     "workflow_executions",
     "workflow_approvals",
     "workflow_execution_events",
+    "agents",
+    "agent_versions",
+    "agent_tool_permissions",
+    "assistant_conversations",
+    "assistant_messages",
+    "agent_executions",
+    "agent_execution_steps",
 ]
 # Path parameters that are static names rather than another organisation's records.
 STATIC_PARAMS = {"kind", "rule_id"}
@@ -178,6 +196,33 @@ async def world(api: Api, second_api: Api) -> World:
             "/purchase-requests", json={"insight_id": stockout["id"], "quantity": 10}
         )
     ).json()
+    # An assistant conversation and an agent run, with a scripted model.
+    from tests.fakes.llm import ScriptedLLM
+
+    second_api.app.state.intelligence.providers.providers["anthropic"] = ScriptedLLM(
+        [[("list_insights", {})], "Two insights are open.", "Nothing to draft."]
+    )
+    await second_api.put(
+        "/intelligence/ai-settings",
+        json={"enabled": True, "provider": "anthropic", "monthly_token_budget": 100000},
+    )
+    answer = (
+        await second_api.post("/assistant/messages", json={"question": "What's open?"})
+    ).json()
+    bob = (await second_api.get("/users/me")).json()["id"]
+    config = (await second_api.get("/agents/inventory-replenishment")).json()
+    await second_api.put(
+        "/agents/inventory-replenishment",
+        json={
+            "enabled": True,
+            "schedule": "off",
+            "run_as_user_id": bob,
+            "params": config["params"],
+            "tools": {t["name"]: t["enabled"] for t in config["tools"]},
+        },
+    )
+    await second_api.post("/agents/inventory-replenishment/runs")
+    agent_run = (await second_api.get("/agents/runs")).json()[0]
     return World(
         api,
         second_api,
@@ -195,6 +240,8 @@ async def world(api: Api, second_api: Api) -> World:
             "rule_id": "inventory.stockout_risk",
             "execution_id": pr["id"],
             "approval_id": pr["approvals"][0]["id"],
+            "conversation_id": answer["conversation_id"],
+            "run_id": agent_run["id"],
         },
     )
 
@@ -240,6 +287,8 @@ async def test_every_route_is_classified(api: Api) -> None:
                 "rule_id",
                 "execution_id",
                 "approval_id",
+                "conversation_id",
+                "run_id",
             }, f"Add a B resource id for {name}"
 
 
@@ -296,6 +345,10 @@ async def test_foreign_resource_ids_inside_own_organisation(world: World) -> Non
     pr = (await world.b.get(f"/purchase-requests/{world.b_ids['execution_id']}")).json()
     assert pr["status"] == "awaiting_approval"
     assert (await world.b.get("/workflows/purchase-requests")).json()["current_version"] == 1
+    conv = (await world.b.get(f"/assistant/conversations/{world.b_ids['conversation_id']}")).json()
+    assert len(conv["messages"]) == 2
+    agent = (await world.b.get("/agents/inventory-replenishment")).json()
+    assert agent["enabled"] is True
 
 
 async def test_lists_never_contain_foreign_rows(world: World) -> None:
@@ -314,6 +367,8 @@ async def test_lists_never_contain_foreign_rows(world: World) -> None:
     assert (await world.a.get("/intelligence/runs")).json() == []
     assert (await world.a.get("/purchase-requests", params={"status": "all"})).json()["total"] == 0
     assert (await world.a.get("/approvals")).json() == []
+    assert (await world.a.get("/assistant/conversations")).json() == []
+    assert (await world.a.get("/agents/runs")).json() == []
 
 
 async def test_unauthenticated_requests_are_rejected(world: World, second_api: Api) -> None:

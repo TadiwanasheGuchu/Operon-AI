@@ -234,6 +234,8 @@ def _apply(insight: Insight, f: Finding) -> None:
 async def _update(s: AsyncSession, insight: Insight, f: Finding, version: int) -> bool:
     if (
         insight.metrics == f.metrics
+        and insight.title == f.title[:300]
+        and insight.subject_label == f.subject_label[:300]
         and insight.severity == f.severity
         and insight.confidence == f.confidence
         and insight.recommendation == f.recommendation

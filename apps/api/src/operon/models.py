@@ -4,6 +4,7 @@ Add each new module's models here; tests/test_database.py fails if a table is mi
 """
 
 from operon.core import models as core_models
+from operon.modules.agents import models as agents_models
 from operon.modules.ai import models as ai_models
 from operon.modules.audit import models as audit_models
 from operon.modules.dashboard import models as dashboard_models
@@ -18,6 +19,7 @@ from operon.modules.permissions import models as permissions_models
 from operon.modules.workflows import models as workflows_models
 
 __all__ = [
+    "agents_models",
     "ai_models",
     "audit_models",
     "core_models",

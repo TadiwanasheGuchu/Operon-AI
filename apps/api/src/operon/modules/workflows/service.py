@@ -151,7 +151,8 @@ async def submit_from_insight(
     insight_id: UUID,
     quantity: int,
     note: str,
-    meta: RequestMeta,
+    meta: RequestMeta | None,
+    origin: dict[str, Any] | None = None,
 ) -> WorkflowExecution:
     """Create a purchase request from a stockout insight's recommendation.
 
@@ -221,6 +222,8 @@ async def submit_from_insight(
         "note": note.strip()[:2000],
         "insight_reference": insight.reference,
         "target": target,
+        # Who drafted it: a person, or an agent acting for that person (ADR 0014).
+        "origin": origin or {"type": "user"},
     }
     now = datetime.now(UTC)
     e = WorkflowExecution(
@@ -254,6 +257,10 @@ async def submit_from_insight(
             )
         )
     e.next_wake_at = due
+    by_agent = bool(origin and origin.get("type") == "agent")
+    actor_label = (
+        f"{origin.get('agent')} for {ctx.user_email}" if by_agent and origin else ctx.user_email
+    )
     session.add(
         event(
             e,
@@ -261,9 +268,13 @@ async def submit_from_insight(
             f"Requested {title} from {inp['supplier_name'] or 'a supplier to be chosen'}"
             + (f", {inp['value_display']}" if inp["value_display"] else "")
             + f". Needs {len(stages)} approval(s).",
-            {"policy_version": version.version, "stages": [s.model_dump() for s in stages]},
+            {
+                "policy_version": version.version,
+                "stages": [s.model_dump() for s in stages],
+                "origin": inp["origin"],
+            },
             user_id=ctx.user_id,
-            label=ctx.user_email,
+            label=actor_label,
         )
     )
     if rec.get("quantity") is not None and int(rec["quantity"]) != quantity:
@@ -294,7 +305,7 @@ async def submit_from_insight(
         await notify_approvers(session, e, first)
     await audit.record(
         session,
-        actor=_actor(ctx),
+        actor=Actor("agent", ctx.user_id, actor_label) if by_agent else _actor(ctx),
         action="workflow.submitted",
         meta=meta,
         organisation_id=ctx.organisation_id,
@@ -307,6 +318,7 @@ async def submit_from_insight(
             "value": inp["value"],
             "currency": currency,
             "insight": insight.reference,
+            "origin": inp["origin"],
         },
     )
     return e

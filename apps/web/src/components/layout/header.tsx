@@ -4,6 +4,7 @@ import { BookOpen, KeyRound, Keyboard, LogOut, Menu, Search, UserRound } from "l
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { AssistantLauncher } from "@/components/domain/agents/assistant-panel";
 import { HelpIcon, NotificationsIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import {
@@ -64,6 +65,8 @@ export function Header({
       <Button variant="quiet" size="icon" className="md:hidden" onClick={onOpenCommand} aria-label="Search">
         <Search className="size-[18px]" aria-hidden />
       </Button>
+
+      <AssistantLauncher />
 
       <NotificationCentre />
 

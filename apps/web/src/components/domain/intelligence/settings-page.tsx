@@ -219,8 +219,8 @@ function AIPanel() {
     <Panel className="mt-6" aria-labelledby="ai-title">
       <PanelHeader
         id="ai-title"
-        title="AI-written explanations"
-        description="Optional. Detection, numbers and recommendations never depend on a model; a model may only rephrase the explanation."
+        title="AI"
+        description="Optional. Detection, numbers, recommendations and approvals never depend on a model."
         actions={ai.data ? <Badge tone={ai.data.enabled ? "success" : "neutral"} icon={Sparkles}>{ai.data.enabled ? "On" : "Off"}</Badge> : undefined}
       />
       <PanelBody>
@@ -272,7 +272,7 @@ function AIForm({ settings: s, canManage }: { settings: AISettings; canManage: b
           <div className="flex items-center gap-3 sm:col-span-3">
             <Switch checked={enabled} onCheckedChange={setEnabled} disabled={none && !s.enabled} aria-labelledby="ai-enabled-label" />
             <span id="ai-enabled-label" className="text-sm text-ink">
-              Let a model rewrite explanations
+              Use AI: explanations, the assistant and agents
             </span>
           </div>
           <Field label="Provider">

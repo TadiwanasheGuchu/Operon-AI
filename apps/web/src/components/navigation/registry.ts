@@ -46,7 +46,7 @@ export const NAV_MODULES: NavModule[] = [
   { id: "incidents", label: "Incidents", href: "/incidents", icon: IncidentsIcon, group: "operate", phase: 4, implemented: true, permission: "incidents.read" },
   { id: "approvals", label: "Approvals", href: "/approvals", icon: ApprovalsIcon, group: "operate", phase: 5, implemented: true, permission: "workflows.read" },
   { id: "workflows", label: "Purchase requests", href: "/workflows", icon: WorkflowsIcon, group: "operate", phase: 5, implemented: true, permission: "workflows.read" },
-  { id: "agents", label: "AI agents", href: "/agents", icon: AgentsIcon, group: "operate", phase: 6, implemented: false },
+  { id: "agents", label: "AI agents", href: "/agents", icon: AgentsIcon, group: "operate", phase: 6, implemented: true, permission: "agents.read" },
   { id: "integrations", label: "Integrations", href: "/integrations", icon: IntegrationsIcon, group: "connect", phase: 3, implemented: true, permission: "integrations.read" },
   { id: "knowledge", label: "Knowledge centre", href: "/knowledge", icon: KnowledgeIcon, group: "connect", phase: 8, implemented: false },
   { id: "reports", label: "Reports", href: "/reports", icon: ReportsIcon, group: "admin", phase: 8, implemented: false },

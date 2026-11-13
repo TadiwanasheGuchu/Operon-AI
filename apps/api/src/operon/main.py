@@ -17,6 +17,8 @@ from operon.core.logging import configure_logging, get_logger
 from operon.core.redis import create_redis
 from operon.core.request_context import RequestContextMiddleware
 from operon.core.security import PasswordService
+from operon.modules.agents.api import router as agents_router
+from operon.modules.agents.service import run_due_agents
 from operon.modules.ai.service import ProviderRegistry
 from operon.modules.audit.api import router as audit_router
 from operon.modules.dashboard.api import router as dashboard_router
@@ -41,7 +43,9 @@ from operon.modules.workflows.engine import sweep as workflow_sweep
 API_PREFIX = "/api/v1"
 
 
-async def _inline_maintenance(rt: WorkflowRuntime, interval: int) -> None:
+async def _inline_maintenance(
+    rt: WorkflowRuntime, providers: ProviderRegistry, interval: int
+) -> None:
     """Development stand-in for Temporal timers and the maintenance schedule."""
     log = get_logger("operon.maintenance")
     while True:
@@ -49,6 +53,7 @@ async def _inline_maintenance(rt: WorkflowRuntime, interval: int) -> None:
         try:
             await escalate_overdue(rt.db)
             await workflow_sweep(rt)
+            await run_due_agents(rt.db, providers)
         except Exception:
             log.exception("inline_maintenance_failed")
 
@@ -89,7 +94,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         if settings.workflow_backend == "inline" and settings.inline_maintenance_interval_seconds:
             maintenance = asyncio.create_task(
                 _inline_maintenance(
-                    app.state.workflow_runtime, settings.inline_maintenance_interval_seconds
+                    app.state.workflow_runtime,
+                    intelligence.providers,
+                    settings.inline_maintenance_interval_seconds,
                 )
             )
         log.info("startup", environment=settings.environment, version=settings.version)
@@ -130,6 +137,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     v1.include_router(intelligence_router)
     v1.include_router(incidents_router)
     v1.include_router(workflows_router)
+    v1.include_router(agents_router)
     v1.include_router(webhooks_router)
     app.include_router(v1)
     return app

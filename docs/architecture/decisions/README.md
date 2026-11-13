@@ -18,5 +18,6 @@ One file per decision: **Context**, **Decision**, **Consequences**, **Status**
 | [0011](0011-intelligence-and-explanations.md) | Deterministic detectors, validated explanations, incidents | Accepted |
 | [0012](0012-approval-workflows.md) | Approval workflows: idempotent state machine on Temporal | Accepted |
 | [0013](0013-sky-palette.md) | Harbour-and-sky palette, light sidebar, fewer cards | Accepted |
+| [0014](0014-assistant-and-agents.md) | Assistant and agents: typed tools, code-enforced limits, human approval | Accepted |
 
 Open: hosting target (affects KMS, managed Postgres, Temporal Cloud vs self-hosted).

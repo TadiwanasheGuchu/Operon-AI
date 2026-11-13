@@ -25,6 +25,7 @@ async def test_new_organisation_has_system_roles(api: Api) -> None:
     assert "members.manage" in current["permissions"]
     viewer = roles[-1]
     assert viewer["permissions"] == [
+        "assistant.use",
         "dashboard.read",
         "incidents.read",
         "insights.read",

@@ -68,12 +68,20 @@ def month_start(now: datetime | None = None) -> datetime:
 
 
 async def tokens_used_this_month(session: AsyncSession, org: UUID) -> int:
-    total = await session.scalar(
+    """Explanations plus assistant and agent runs: one budget for all model use."""
+    from operon.modules.agents.models import AgentExecution
+
+    explanations = await session.scalar(
         select(
             func.coalesce(func.sum(AIGeneration.input_tokens + AIGeneration.output_tokens), 0)
         ).where(AIGeneration.organisation_id == org, AIGeneration.created_at >= month_start())
     )
-    return int(total or 0)
+    runs = await session.scalar(
+        select(
+            func.coalesce(func.sum(AgentExecution.input_tokens + AgentExecution.output_tokens), 0)
+        ).where(AgentExecution.organisation_id == org, AgentExecution.started_at >= month_start())
+    )
+    return int(explanations or 0) + int(runs or 0)
 
 
 async def status(session: AsyncSession, org: UUID, registry: ProviderRegistry) -> AIStatus:

@@ -5,7 +5,7 @@ instance or a reason there isn't one. Vendor SDKs are imported only by the adapt
 """
 
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Any, Protocol
 
 from pydantic import BaseModel
 
@@ -36,3 +36,64 @@ class LLMProvider(Protocol):
     async def generate[T: BaseModel](
         self, *, system: str, user: str, schema: type[T], max_output_tokens: int
     ) -> StructuredResult[T]: ...
+
+
+# --- tool use (assistant and agents, ADR 0014) ---------------------------------------------------
+
+
+@dataclass(frozen=True)
+class ToolSpec:
+    name: str
+    description: str
+    input_schema: dict[str, Any]
+
+
+@dataclass(frozen=True)
+class ToolCall:
+    id: str
+    name: str
+    input: dict[str, Any]
+
+
+@dataclass
+class ToolTurn:
+    """One model response in a tool loop."""
+
+    text: str | None
+    tool_calls: list[ToolCall]
+    # "tool_use" (calls to run) | "end" (final text) | "refused" | "truncated"
+    outcome: str
+    model: str
+    input_tokens: int
+    output_tokens: int
+    # Provider-native assistant content, echoed back verbatim (keeps thinking blocks intact).
+    raw: Any = None
+    detail: str | None = None
+
+
+@dataclass(frozen=True)
+class ToolResult:
+    call_id: str
+    content: str
+    is_error: bool = False
+
+
+class ToolLoopProvider(Protocol):
+    """A provider that can run a multi-step tool loop. The transcript is provider-native and
+    opaque to callers; they only start it, ask for the next turn and add tool results."""
+
+    name: str
+    model: str
+
+    def start(self, history: list[tuple[str, str]], user_text: str) -> list[Any]: ...
+
+    async def converse(
+        self,
+        *,
+        system: str,
+        transcript: list[Any],
+        tools: list[ToolSpec],
+        max_output_tokens: int,
+    ) -> ToolTurn: ...
+
+    def extend(self, transcript: list[Any], turn: ToolTurn, results: list[ToolResult]) -> None: ...

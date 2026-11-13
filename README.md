@@ -3,7 +3,7 @@
 Operational intelligence for enterprise operations teams: observe, understand, detect, recommend
 and execute, with a human in control of every consequential action.
 
-**Status:** Phases 0–5 complete:
+**Status:** Phases 0–6 complete:
 
 - A secure multi-tenant foundation.
 - An operations overview that labels where every figure comes from.
@@ -13,8 +13,8 @@ and execute, with a human in control of every consequential action.
 - Workflows: purchase requests from stockout insights, with multi-stage approvals, separation of
   duties and versioned policy. Approved requests become draft POs in Odoo, without duplicates.
 
-Not yet verified live: the Odoo/Shopify connectors, the Temporal path and the AI providers (they need
-sandboxes and keys). Next: Phase 6, the AI assistant and the first controlled agent.
+Not yet verified live: the Odoo/Shopify connectors, the Temporal path, the AI providers and the
+agent evaluation suite (they need sandboxes and keys). Next: Phase 7, enterprise readiness.
 
 ```bash
 docker compose up --build        # or: make setup db-init migrate, then make api / make web

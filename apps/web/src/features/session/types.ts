@@ -49,4 +49,8 @@ export type Permission =
   | "workflows.read"
   | "workflows.request"
   | "workflows.manage"
-  | "approvals.decide";
+  | "approvals.decide"
+  | "assistant.use"
+  | "agents.read"
+  | "agents.run"
+  | "agents.manage";
