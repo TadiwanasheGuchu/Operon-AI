@@ -1,0 +1,276 @@
+{
+ "organisation": {
+  "id": "01a1d52b-67e2-771c-b8c9-73ab9fdc6eb3",
+  "name": "Acme Distribution",
+  "is_demo": false
+ },
+ "viewer": {
+  "name": "Olu Owner",
+  "role_key": "owner",
+  "role_name": "Owner"
+ },
+ "layout": {
+  "preset": "executive",
+  "name": "Executive",
+  "is_default": true,
+  "sections": [
+   {
+    "key": "getting_started",
+    "size": "wide"
+   },
+   {
+    "key": "insights",
+    "size": "wide"
+   },
+   {
+    "key": "incidents",
+    "size": "narrow"
+   },
+   {
+    "key": "team",
+    "size": "narrow"
+   },
+   {
+    "key": "fill_rate",
+    "size": "wide"
+   },
+   {
+    "key": "approvals",
+    "size": "narrow"
+   },
+   {
+    "key": "workflows",
+    "size": "wide"
+   },
+   {
+    "key": "integrations",
+    "size": "narrow"
+   },
+   {
+    "key": "activity",
+    "size": "narrow"
+   }
+  ]
+ },
+ "period": "7d",
+ "generated_at": "2026-11-13T13:49:14.338635Z",
+ "indicators": [
+  {
+   "key": "members",
+   "label": "Members",
+   "value": 2,
+   "total": null,
+   "previous_value": null,
+   "increase_is": "neutral",
+   "state": "neutral",
+   "detail": "0 invitations pending",
+   "provenance": "live"
+  },
+  {
+   "key": "mfa_coverage",
+   "label": "Two-factor enabled",
+   "value": 0,
+   "total": 2,
+   "previous_value": null,
+   "increase_is": "good",
+   "state": "attention",
+   "detail": "2 without two-factor",
+   "provenance": "live"
+  },
+  {
+   "key": "integrations",
+   "label": "Integrations connected",
+   "value": null,
+   "total": null,
+   "previous_value": null,
+   "increase_is": "neutral",
+   "state": "neutral",
+   "detail": "No systems connected yet",
+   "provenance": "unavailable"
+  },
+  {
+   "key": "open_insights",
+   "label": "Open insights",
+   "value": null,
+   "total": null,
+   "previous_value": null,
+   "increase_is": "neutral",
+   "state": "neutral",
+   "detail": "Detection starts once data flows",
+   "provenance": "unavailable"
+  },
+  {
+   "key": "pending_approvals",
+   "label": "Pending approvals",
+   "value": 0,
+   "total": null,
+   "previous_value": null,
+   "increase_is": "neutral",
+   "state": "healthy",
+   "detail": "Nothing waiting",
+   "provenance": "live"
+  }
+ ],
+ "getting_started": {
+  "state": "ready",
+  "provenance": "live",
+  "as_of": "2026-11-13T13:49:14.338635Z",
+  "message": null,
+  "available_in_phase": null,
+  "data": [
+   {
+    "key": "mfa",
+    "title": "Protect your account with two-factor authentication",
+    "body": "Required by many organisations, and the best defence against stolen passwords.",
+    "done": false,
+    "available": true,
+    "href": "/account/security",
+    "action_label": "Set up"
+   },
+   {
+    "key": "team",
+    "title": "Invite your team",
+    "body": "Give colleagues the role that matches what they need to do.",
+    "done": true,
+    "available": true,
+    "href": "/admin/members",
+    "action_label": "Invite people"
+   },
+   {
+    "key": "integrations",
+    "title": "Connect your inventory and sales systems",
+    "body": "Connect Odoo or Shopify, or import CSV files. Operational insights start once data flows.",
+    "done": false,
+    "available": true,
+    "href": "/integrations",
+    "action_label": "Connect a system"
+   }
+  ]
+ },
+ "insights": {
+  "state": "unavailable",
+  "provenance": "unavailable",
+  "as_of": null,
+  "message": "Insights appear once a connected system supplies data.",
+  "available_in_phase": null,
+  "data": null
+ },
+ "approvals": {
+  "state": "ready",
+  "provenance": "live",
+  "as_of": "2026-11-13T13:49:14.338635Z",
+  "message": null,
+  "available_in_phase": null,
+  "data": []
+ },
+ "incidents": {
+  "state": "ready",
+  "provenance": "live",
+  "as_of": "2026-11-13T13:49:14.338635Z",
+  "message": null,
+  "available_in_phase": null,
+  "data": {
+   "critical": 0,
+   "high": 0,
+   "medium": 0,
+   "low": 0
+  }
+ },
+ "fill_rate": {
+  "state": "unavailable",
+  "provenance": "unavailable",
+  "as_of": null,
+  "message": "Fill rate needs customer order lines, which the current integrations don't import yet.",
+  "available_in_phase": null,
+  "data": null
+ },
+ "inventory_risk": {
+  "state": "unavailable",
+  "provenance": "unavailable",
+  "as_of": null,
+  "message": "Needs stock levels from a connected system.",
+  "available_in_phase": null,
+  "data": null
+ },
+ "workflows": {
+  "state": "unavailable",
+  "provenance": "unavailable",
+  "as_of": null,
+  "message": "No purchase requests yet. Raise one from a stockout insight.",
+  "available_in_phase": null,
+  "data": null
+ },
+ "integrations": {
+  "state": "unavailable",
+  "provenance": "unavailable",
+  "as_of": null,
+  "message": "No systems are connected yet.",
+  "available_in_phase": 3,
+  "data": null
+ },
+ "activity": {
+  "state": "ready",
+  "provenance": "live",
+  "as_of": "2026-11-13T13:49:14.338635Z",
+  "message": null,
+  "available_in_phase": null,
+  "data": [
+   {
+    "id": "01a1d52b-688a-780d-85e7-61095bf6b2e5",
+    "at": "2026-11-13T13:49:14.250044Z",
+    "actor_type": "user",
+    "actor": "Bo Lin",
+    "message": "Joined the organisation",
+    "ref": null
+   },
+   {
+    "id": "01a1d52b-6861-7f6a-a4eb-9430e6ad6b41",
+    "at": "2026-11-13T13:49:14.209285Z",
+    "actor_type": "user",
+    "actor": "Olu Owner",
+    "message": "Invited bo@acme.example as viewer",
+    "ref": null
+   },
+   {
+    "id": "01a1d52b-67f8-7cc9-8058-b963c5b0c557",
+    "at": "2026-11-13T13:49:14.104779Z",
+    "actor_type": "user",
+    "actor": "Olu Owner",
+    "message": "Joined the organisation",
+    "ref": null
+   },
+   {
+    "id": "01a1d52b-67f8-7a0a-85b4-12dead5a2198",
+    "at": "2026-11-13T13:49:14.104759Z",
+    "actor_type": "user",
+    "actor": "Olu Owner",
+    "message": "Created the organisation",
+    "ref": null
+   }
+  ]
+ },
+ "team": {
+  "state": "ready",
+  "provenance": "live",
+  "as_of": "2026-11-13T13:49:14.338635Z",
+  "message": null,
+  "available_in_phase": null,
+  "data": {
+   "members": 2,
+   "pending_invitations": 0,
+   "mfa_enabled": 0,
+   "recent_joins": [
+    {
+     "name": "Bo Lin",
+     "role_name": "Viewer",
+     "joined_at": "2026-11-13T13:49:14.217496Z"
+    },
+    {
+     "name": "Olu Owner",
+     "role_name": "Owner",
+     "joined_at": "2026-11-13T13:49:14.066977Z"
+    }
+   ]
+  }
+ }
+}

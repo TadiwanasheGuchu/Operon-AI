@@ -1,0 +1,458 @@
+{
+ "organisation": {
+  "id": "01a1d52b-67e2-771c-b8c9-73ab9fdc6eb3",
+  "name": "Acme Distribution",
+  "is_demo": false
+ },
+ "viewer": {
+  "name": "Olu Owner",
+  "role_key": "owner",
+  "role_name": "Owner"
+ },
+ "layout": {
+  "preset": "executive",
+  "name": "Executive",
+  "is_default": true,
+  "sections": [
+   {
+    "key": "getting_started",
+    "size": "wide"
+   },
+   {
+    "key": "insights",
+    "size": "wide"
+   },
+   {
+    "key": "incidents",
+    "size": "narrow"
+   },
+   {
+    "key": "team",
+    "size": "narrow"
+   },
+   {
+    "key": "fill_rate",
+    "size": "wide"
+   },
+   {
+    "key": "approvals",
+    "size": "narrow"
+   },
+   {
+    "key": "workflows",
+    "size": "wide"
+   },
+   {
+    "key": "integrations",
+    "size": "narrow"
+   },
+   {
+    "key": "activity",
+    "size": "narrow"
+   }
+  ]
+ },
+ "period": "7d",
+ "generated_at": "2026-11-13T13:49:14.982414Z",
+ "indicators": [
+  {
+   "key": "members",
+   "label": "Members",
+   "value": 2,
+   "total": null,
+   "previous_value": null,
+   "increase_is": "neutral",
+   "state": "neutral",
+   "detail": "0 invitations pending",
+   "provenance": "live"
+  },
+  {
+   "key": "mfa_coverage",
+   "label": "Two-factor enabled",
+   "value": 0,
+   "total": 2,
+   "previous_value": null,
+   "increase_is": "good",
+   "state": "attention",
+   "detail": "2 without two-factor",
+   "provenance": "live"
+  },
+  {
+   "key": "integrations",
+   "label": "Integrations healthy",
+   "value": 1,
+   "total": 1,
+   "previous_value": null,
+   "increase_is": "good",
+   "state": "healthy",
+   "detail": "All syncing normally",
+   "provenance": "live"
+  },
+  {
+   "key": "open_insights",
+   "label": "Open insights",
+   "value": 2,
+   "total": null,
+   "previous_value": null,
+   "increase_is": "neutral",
+   "state": "critical",
+   "detail": "2 high or critical",
+   "provenance": "live"
+  },
+  {
+   "key": "pending_approvals",
+   "label": "Pending approvals",
+   "value": 1,
+   "total": null,
+   "previous_value": null,
+   "increase_is": "neutral",
+   "state": "attention",
+   "detail": "Waiting for a decision",
+   "provenance": "live"
+  }
+ ],
+ "getting_started": {
+  "state": "ready",
+  "provenance": "live",
+  "as_of": "2026-11-13T13:49:14.982414Z",
+  "message": null,
+  "available_in_phase": null,
+  "data": [
+   {
+    "key": "mfa",
+    "title": "Protect your account with two-factor authentication",
+    "body": "Required by many organisations, and the best defence against stolen passwords.",
+    "done": false,
+    "available": true,
+    "href": "/account/security",
+    "action_label": "Set up"
+   },
+   {
+    "key": "team",
+    "title": "Invite your team",
+    "body": "Give colleagues the role that matches what they need to do.",
+    "done": true,
+    "available": true,
+    "href": "/admin/members",
+    "action_label": "Invite people"
+   },
+   {
+    "key": "integrations",
+    "title": "Connect your inventory and sales systems",
+    "body": "Connect Odoo or Shopify, or import CSV files. Operational insights start once data flows.",
+    "done": true,
+    "available": true,
+    "href": "/integrations",
+    "action_label": "Connect a system"
+   }
+  ]
+ },
+ "insights": {
+  "state": "ready",
+  "provenance": "live",
+  "as_of": "2026-11-13T13:49:14.982414Z",
+  "message": null,
+  "available_in_phase": null,
+  "data": [
+   {
+    "id": "01a1d52b-6a3f-7faa-a650-ed9f76f4c642",
+    "ref": "INS-0001",
+    "title": "Nitrile gloves, size L may run out at Leeds DC before an order can arrive",
+    "category": "inventory",
+    "severity": "critical",
+    "status": "acknowledged",
+    "detected_at": "2026-11-13T13:49:14.663822Z",
+    "owner": null,
+    "source_system": "Warehouse spreadsheets",
+    "rule_id": "inventory.stockout_risk",
+    "rule_version": 1,
+    "summary": "1,240 box on hand and 300 box inbound against a reorder point of 1,704.2 box. Recommended order: 1,467 box.",
+    "why_it_matters": "Customers may go unserved until replenishment arrives, and any delay to inbound purchase orders extends the gap.",
+    "recommended_action": "Raise a purchase request for 1,467 box from Brightline Safety Supplies, about GBP 7,114.95.",
+    "assumptions": [
+     "Includes 300 box on purchase orders that are already late."
+    ],
+    "limitations": [],
+    "evidence": [
+     {
+      "label": "On hand at Leeds DC",
+      "value": "1,240 box",
+      "source": "Warehouse spreadsheets"
+     },
+     {
+      "label": "Average daily sales (28 days to 2026-11-12)",
+      "value": "186 box",
+      "source": "Warehouse spreadsheets"
+     },
+     {
+      "label": "Day-to-day variation in sales (standard deviation)",
+      "value": "6.1 box",
+      "source": "Warehouse spreadsheets"
+     },
+     {
+      "label": "Lead time from Brightline Safety Supplies",
+      "value": "9 days",
+      "source": "Warehouse spreadsheets"
+     },
+     {
+      "label": "Service level target",
+      "value": "95% (z = 1.65)",
+      "source": null
+     },
+     {
+      "label": "Safety stock",
+      "value": "30.2 box",
+      "source": "z × standard deviation × √lead time"
+     },
+     {
+      "label": "Reorder point",
+      "value": "1,704.2 box",
+      "source": "average daily sales × lead time + safety stock"
+     },
+     {
+      "label": "Inbound by 2026-11-22 (open purchase orders)",
+      "value": "300 box",
+      "source": "sum of open purchase-order lines expected within the lead time"
+     }
+    ],
+    "explanation_generated_by": "template",
+    "explanation_model": null
+   },
+   {
+    "id": "01a1d52b-6aa3-7783-8fc1-cbea1fa74c2f",
+    "ref": "INS-0002",
+    "title": "Purchase order PO-OLD from Brightline Safety Supplies is 10 days late",
+    "category": "procurement",
+    "severity": "high",
+    "status": "open",
+    "detected_at": "2026-11-13T13:49:14.753466Z",
+    "owner": null,
+    "source_system": "Warehouse spreadsheets",
+    "rule_id": "procurement.po_overdue",
+    "rule_version": 1,
+    "summary": "Expected by 2026-11-03; 1 line(s) not yet fully received.",
+    "why_it_matters": "Stock planned on this order isn't available yet, which can delay customer orders and production that depend on it. Confirming a new delivery date with the supplier keeps plans realistic.",
+    "recommended_action": "Contact Brightline Safety Supplies to confirm a delivery date for PO-OLD, and update the expected date in the source system.",
+    "assumptions": [
+     "Receipts recorded in the source system are up to date as of the last sync."
+    ],
+    "limitations": [],
+    "evidence": [
+     {
+      "label": "Purchase order",
+      "value": "PO-OLD from Brightline Safety Supplies",
+      "source": "Warehouse spreadsheets"
+     },
+     {
+      "label": "Expected receipt",
+      "value": "2026-11-03",
+      "source": "Warehouse spreadsheets"
+     },
+     {
+      "label": "Days late",
+      "value": "10 days",
+      "source": "2026-11-13 − expected receipt date"
+     },
+     {
+      "label": "Not yet received: GLV",
+      "value": "300 box of 300 box",
+      "source": "Warehouse spreadsheets"
+     },
+     {
+      "label": "Value not yet received",
+      "value": "GBP 1,410.00",
+      "source": "Σ (ordered − received) × unit price"
+     }
+    ],
+    "explanation_generated_by": "template",
+    "explanation_model": null
+   }
+  ]
+ },
+ "approvals": {
+  "state": "ready",
+  "provenance": "live",
+  "as_of": "2026-11-13T13:49:14.982414Z",
+  "message": null,
+  "available_in_phase": null,
+  "data": [
+   {
+    "id": "01a1d52b-6b30-7583-b8d0-ff8f8e3a5c53",
+    "ref": "PR-0001",
+    "title": "1,467 box of Nitrile gloves, size L",
+    "requester": "Olu Owner",
+    "amount": 7114.95,
+    "currency": "GBP",
+    "policy": "Operations approval: Required for every purchase request.",
+    "requested_at": "2026-11-13T13:49:14.901635Z",
+    "related_insight_ref": "INS-0001"
+   }
+  ]
+ },
+ "incidents": {
+  "state": "ready",
+  "provenance": "live",
+  "as_of": "2026-11-13T13:49:14.982414Z",
+  "message": null,
+  "available_in_phase": null,
+  "data": {
+   "critical": 0,
+   "high": 0,
+   "medium": 0,
+   "low": 0
+  }
+ },
+ "fill_rate": {
+  "state": "unavailable",
+  "provenance": "unavailable",
+  "as_of": null,
+  "message": "Fill rate needs customer order lines, which the current integrations don't import yet.",
+  "available_in_phase": null,
+  "data": null
+ },
+ "inventory_risk": {
+  "state": "ready",
+  "provenance": "live",
+  "as_of": "2026-11-13T13:49:14.982414Z",
+  "message": null,
+  "available_in_phase": null,
+  "data": [
+   {
+    "location": "Leeds DC",
+    "skus_at_risk": 1,
+    "skus_tracked": 2
+   }
+  ]
+ },
+ "workflows": {
+  "state": "ready",
+  "provenance": "live",
+  "as_of": "2026-11-13T13:49:14.982414Z",
+  "message": null,
+  "available_in_phase": null,
+  "data": [
+   {
+    "workflow": "Purchase requests",
+    "running": 0,
+    "awaiting_approval": 1,
+    "failed_24h": 0,
+    "completed": 0,
+    "success_rate": 100.0
+   }
+  ]
+ },
+ "integrations": {
+  "state": "ready",
+  "provenance": "live",
+  "as_of": "2026-11-13T13:49:14.982414Z",
+  "message": null,
+  "available_in_phase": null,
+  "data": [
+   {
+    "id": "01a1d52b-6933-73bb-b6d0-600d962bf2db",
+    "name": "Warehouse spreadsheets",
+    "system": "CSV import",
+    "status": "healthy",
+    "last_sync_at": "2026-11-13T13:49:14.747629Z",
+    "detail": "Imported from CSV files"
+   }
+  ]
+ },
+ "activity": {
+  "state": "ready",
+  "provenance": "live",
+  "as_of": "2026-11-13T13:49:14.982414Z",
+  "message": null,
+  "available_in_phase": null,
+  "data": [
+   {
+    "id": "01a1d52b-6a7c-7052-972b-f4c54eca017b",
+    "at": "2026-11-13T13:49:14.748200Z",
+    "actor_type": "user",
+    "actor": "Olu Owner",
+    "message": "Imported 2 rows of purchase order lines",
+    "ref": null
+   },
+   {
+    "id": "01a1d52b-6a23-77d6-ae71-8781d256c962",
+    "at": "2026-11-13T13:49:14.659509Z",
+    "actor_type": "user",
+    "actor": "Olu Owner",
+    "message": "Imported 56 rows of sales",
+    "ref": null
+   },
+   {
+    "id": "01a1d52b-69e0-74c1-8fe8-686e8a2cefd6",
+    "at": "2026-11-13T13:49:14.592405Z",
+    "actor_type": "user",
+    "actor": "Olu Owner",
+    "message": "Imported 2 rows of stock levels",
+    "ref": null
+   },
+   {
+    "id": "01a1d52b-69b9-7e18-b5e7-923a8c487a2a",
+    "at": "2026-11-13T13:49:14.553590Z",
+    "actor_type": "user",
+    "actor": "Olu Owner",
+    "message": "Imported 2 rows of supplier terms",
+    "ref": null
+   },
+   {
+    "id": "01a1d52b-698d-7ca8-9b67-7c9162fd7a28",
+    "at": "2026-11-13T13:49:14.509671Z",
+    "actor_type": "user",
+    "actor": "Olu Owner",
+    "message": "Imported 2 rows of products",
+    "ref": null
+   },
+   {
+    "id": "01a1d52b-694f-7284-9d08-79a8383388fa",
+    "at": "2026-11-13T13:49:14.447033Z",
+    "actor_type": "user",
+    "actor": "Olu Owner",
+    "message": "Imported 1 row of locations",
+    "ref": null
+   },
+   {
+    "id": "01a1d52b-6936-7cdb-924e-1d078694fa6e",
+    "at": "2026-11-13T13:49:14.422284Z",
+    "actor_type": "user",
+    "actor": "Olu Owner",
+    "message": "Connected Warehouse spreadsheets",
+    "ref": null
+   },
+   {
+    "id": "01a1d52b-688a-780d-85e7-61095bf6b2e5",
+    "at": "2026-11-13T13:49:14.250044Z",
+    "actor_type": "user",
+    "actor": "Bo Lin",
+    "message": "Joined the organisation",
+    "ref": null
+   }
+  ]
+ },
+ "team": {
+  "state": "ready",
+  "provenance": "live",
+  "as_of": "2026-11-13T13:49:14.982414Z",
+  "message": null,
+  "available_in_phase": null,
+  "data": {
+   "members": 2,
+   "pending_invitations": 0,
+   "mfa_enabled": 0,
+   "recent_joins": [
+    {
+     "name": "Bo Lin",
+     "role_name": "Viewer",
+     "joined_at": "2026-11-13T13:49:14.217496Z"
+    },
+    {
+     "name": "Olu Owner",
+     "role_name": "Owner",
+     "joined_at": "2026-11-13T13:49:14.066977Z"
+    }
+   ]
+  }
+ }
+}

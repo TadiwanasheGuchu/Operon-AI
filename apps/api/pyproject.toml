@@ -1,0 +1,87 @@
+[project]
+name = "operon-api"
+version = "0.1.0"
+description = "Operon AI API — modular monolith"
+requires-python = ">=3.13"
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.32",
+  "pydantic>=2.9",
+  "pydantic-settings>=2.6",
+  "sqlalchemy[asyncio]>=2.0.36",
+  "asyncpg>=0.30",
+  "alembic>=1.14",
+  "psycopg[binary]>=3.2",
+  "structlog>=24.4",
+  "redis>=5.2",
+  "argon2-cffi>=23.1",
+  "pyotp>=2.9",
+  "cryptography>=44",
+  "email-validator>=2.2",
+  "temporalio>=1.9",
+  "httpx>=0.28",
+  "python-multipart>=0.0.20",
+  "anthropic>=2.8.0",
+  "openai>=3.50.0",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=8.3",
+  "pytest-asyncio>=0.24",
+  "httpx>=0.28",
+  "ruff>=0.8",
+  "mypy>=1.13",
+  "import-linter>=2.1",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/operon"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "ASYNC", "RUF", "N", "SIM", "PT"]
+ignore = ["S101"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S105", "S106", "S608", "E501"]
+# Fictional demo copy: real typography (× σ −) and long sentences are intentional.
+"src/operon/modules/dashboard/demo.py" = ["RUF001", "E501"]
+"migrations/versions/**" = ["E501"]
+# GraphQL documents read best unwrapped.
+"src/operon/modules/integrations/connectors/shopify.py" = ["E501"]
+# Formulas shown to users use real mathematical signs (× ÷ − √ σ).
+"src/operon/modules/intelligence/**" = ["RUF001", "RUF002", "RUF003"]
+
+[tool.mypy]
+strict = true
+python_version = "3.13"
+plugins = ["pydantic.mypy"]
+mypy_path = "src"
+
+[[tool.mypy.overrides]]
+module = ["asyncpg.*"]
+ignore_missing_imports = true
+
+[tool.importlinter]
+root_package = "operon"
+
+[[tool.importlinter.contracts]]
+name = "Core does not depend on domain modules"
+type = "forbidden"
+source_modules = ["operon.core"]
+forbidden_modules = ["operon.modules"]

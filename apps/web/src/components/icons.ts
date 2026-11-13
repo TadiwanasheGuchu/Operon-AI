@@ -1,0 +1,36 @@
+/**
+ * Central Lucide icon mapping (docs/design/frontend-design-direction.md §5).
+ * Import domain icons from here so one concept always uses one glyph.
+ */
+export {
+  Activity as HealthyIcon,
+  Bell as NotificationsIcon,
+  Bot as AgentsIcon,
+  Boxes as InventoryIcon,
+  Building2 as OrganisationIcon,
+  ChartNoAxesCombined as ReportsIcon,
+  CircleCheck as SuccessIcon,
+  CircleX as FailureIcon,
+  ClipboardCheck as ApprovalsIcon,
+  Ellipsis as MoreIcon,
+  ExternalLink as ExternalLinkIcon,
+  LayoutDashboard as OverviewIcon,
+  Library as KnowledgeIcon,
+  Plug as IntegrationsIcon,
+  ScanSearch as IntelligenceIcon,
+  ScrollText as AuditIcon,
+  Search as SearchIcon,
+  Settings2 as SettingsIcon,
+  ShieldCheck as SecurityIcon,
+  ShoppingBasket as ProcurementIcon,
+  Siren as IncidentsIcon,
+  TriangleAlert as WarningIcon,
+  Truck as LogisticsIcon,
+  Users as UsersIcon,
+  Wallet as FinanceIcon,
+  Workflow as WorkflowsIcon,
+  Info as InfoIcon,
+  Lock as PermissionIcon,
+  Component as ComponentsIcon,
+  CircleHelp as HelpIcon,
+} from "lucide-react";

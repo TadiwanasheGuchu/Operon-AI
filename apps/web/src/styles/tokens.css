@@ -1,0 +1,107 @@
+/*
+ * Operon AI design tokens — single source of truth for colour, type, spacing, radius,
+ * elevation and motion. Components consume semantic tokens (--surface-*, --text-*, --status-*),
+ * never raw brand hex values. See docs/design/design-tokens.md.
+ */
+:root {
+  /* Brand palette — harbour and sky: deep water, sky blue and cool mist neutrals.
+     Contrast figures are against white unless stated. */
+  --color-deep-sea: #0d2638; /* strongest text, brand panel */
+  --color-harbour: #123a55; /* brand panel hover, pressed primary */
+  --color-ocean: #1667a0; /* primary actions and links — 6.03:1 with white text */
+  --color-ocean-deep: #0f4f7d; /* primary hover — 8.62:1 */
+  --color-slate: #3d5568; /* secondary text — 7.29:1 on canvas */
+  --color-sky: #3fa2e0; /* decorative accent only (logo node, markers): 2.82:1 */
+  --color-shallows: #cde5f4; /* disabled fills, avatar tiles */
+  --color-mist: #ddeffb; /* selected rows and navigation — ocean text 5.12:1 on it */
+  --color-foam: #edf6fc; /* hover and sunken surfaces */
+  --color-cloud: #f4f8fb; /* main application background */
+  --color-white: #ffffff;
+  --color-haze: #dce5ec; /* hairlines and panel borders */
+  --color-steel: #7f92a1; /* icons, input borders — 3.2:1, not body text */
+  --color-steel-strong: #5b6f7e; /* muted text — 4.89:1 on canvas */
+
+  /* Functional palette (text variants meet WCAG AA on their tints). Info is teal so it never
+     reads as the brand blue. */
+  --color-success: #2e7350;
+  --color-success-bg: #e7f3ec;
+  --color-warning: #8f5b12;
+  --color-warning-bg: #fbf1df;
+  --color-danger: #b13a30;
+  --color-danger-bg: #fbe9e6;
+  --color-danger-hover: #962f26;
+  --color-info: #0e6e7e;
+  --color-info-bg: #e3f4f6;
+
+  /* Semantic: surfaces */
+  --surface-canvas: var(--color-cloud);
+  --surface-raised: var(--color-white);
+  --surface-sunken: var(--color-foam);
+  --surface-selected: var(--color-mist);
+  --surface-nav: var(--color-white);
+  --surface-nav-hover: var(--color-foam);
+  --surface-nav-active: var(--color-mist);
+  --surface-brand: var(--color-deep-sea); /* sign-in panel only */
+  --surface-brand-soft: var(--color-harbour);
+
+  /* Semantic: text */
+  --text-primary: var(--color-deep-sea);
+  --text-secondary: var(--color-slate);
+  --text-muted: var(--color-steel-strong);
+  --text-inverse: var(--color-white);
+  --text-nav: var(--color-slate);
+  --text-nav-muted: var(--color-steel-strong);
+  --text-nav-active: var(--color-ocean);
+  --text-brand-muted: #a9c8dc; /* on deep-sea: 8.9:1 */
+
+  /* Semantic: lines */
+  --border-subtle: var(--color-haze);
+  --border-control: var(--color-steel);
+  --border-nav: var(--color-haze);
+  --focus-ring: var(--color-ocean);
+  --focus-ring-inverse: var(--color-sky);
+
+  /* Semantic: actions */
+  --action-primary: var(--color-ocean);
+  --action-primary-hover: var(--color-ocean-deep);
+  --action-accent: var(--color-sky);
+
+  /* Data visualisation (single-series charts use --chart-series) */
+  --chart-series: var(--color-ocean);
+  --chart-series-soft: rgb(22 103 160 / 0.1);
+  --chart-reference: var(--color-steel-strong);
+  --chart-grid: var(--color-haze);
+
+  /* Typography */
+  --font-ui: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-newsreader), Georgia, serif;
+  --font-data: var(--font-plex-mono), ui-monospace, monospace;
+
+  /* Radius */
+  --radius-control: 8px;
+  --radius-panel: 10px;
+  --radius-dialog: 16px;
+
+  /* Elevation — used only for floating layers */
+  --shadow-popover: 0 1px 2px rgb(13 38 56 / 0.06), 0 8px 24px rgb(13 38 56 / 0.1);
+  --shadow-dialog: 0 2px 4px rgb(13 38 56 / 0.06), 0 24px 48px rgb(13 38 56 / 0.16);
+
+  /* Layout */
+  --sidebar-width: 256px;
+  --sidebar-width-collapsed: 72px;
+  --header-height: 64px;
+
+  /* Motion */
+  --duration-fast: 140ms;
+  --duration-base: 200ms;
+  --duration-panel: 260ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --duration-panel: 0ms;
+  }
+}

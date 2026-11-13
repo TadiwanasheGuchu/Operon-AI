@@ -1,0 +1,557 @@
+{
+ "organisation": {
+  "id": "01a1d52b-6ba3-7c87-944d-626797823514",
+  "name": "Harbour & Vale (demo)",
+  "is_demo": true
+ },
+ "viewer": {
+  "name": "Olu Owner",
+  "role_key": "owner",
+  "role_name": "Owner"
+ },
+ "layout": {
+  "preset": "executive",
+  "name": "Executive",
+  "is_default": true,
+  "sections": [
+   {
+    "key": "getting_started",
+    "size": "wide"
+   },
+   {
+    "key": "insights",
+    "size": "wide"
+   },
+   {
+    "key": "incidents",
+    "size": "narrow"
+   },
+   {
+    "key": "team",
+    "size": "narrow"
+   },
+   {
+    "key": "fill_rate",
+    "size": "wide"
+   },
+   {
+    "key": "approvals",
+    "size": "narrow"
+   },
+   {
+    "key": "workflows",
+    "size": "wide"
+   },
+   {
+    "key": "integrations",
+    "size": "narrow"
+   },
+   {
+    "key": "activity",
+    "size": "narrow"
+   }
+  ]
+ },
+ "period": "7d",
+ "generated_at": "2026-11-13T13:49:15.078617Z",
+ "indicators": [
+  {
+   "key": "open_insights",
+   "label": "Open insights",
+   "value": 7,
+   "total": null,
+   "previous_value": 4,
+   "increase_is": "bad",
+   "state": "critical",
+   "detail": "1 critical · 2 high",
+   "provenance": "demo"
+  },
+  {
+   "key": "active_incidents",
+   "label": "Active incidents",
+   "value": 3,
+   "total": null,
+   "previous_value": 2,
+   "increase_is": "bad",
+   "state": "attention",
+   "detail": "Oldest open 2 d",
+   "provenance": "demo"
+  },
+  {
+   "key": "pending_approvals",
+   "label": "Pending approvals",
+   "value": 4,
+   "total": null,
+   "previous_value": 3,
+   "increase_is": "neutral",
+   "state": "attention",
+   "detail": "£26,810 awaiting decision",
+   "provenance": "demo"
+  },
+  {
+   "key": "workflows_in_progress",
+   "label": "Workflows in progress",
+   "value": 12,
+   "total": null,
+   "previous_value": 9,
+   "increase_is": "neutral",
+   "state": "neutral",
+   "detail": "1 failed in last 24 h",
+   "provenance": "demo"
+  },
+  {
+   "key": "integrations",
+   "label": "Integrations healthy",
+   "value": 1,
+   "total": 2,
+   "previous_value": null,
+   "increase_is": "good",
+   "state": "attention",
+   "detail": "Shopify needs reconnection",
+   "provenance": "demo"
+  }
+ ],
+ "getting_started": {
+  "state": "ready",
+  "provenance": "demo",
+  "as_of": "2026-11-13T13:49:15.078617Z",
+  "message": null,
+  "available_in_phase": null,
+  "data": []
+ },
+ "insights": {
+  "state": "ready",
+  "provenance": "demo",
+  "as_of": "2026-11-13T13:49:15.078617Z",
+  "message": null,
+  "available_in_phase": null,
+  "data": [
+   {
+    "id": "demo_ins_2041",
+    "ref": "INS-2041",
+    "title": "Stockout risk: nitrile gloves, size L at Leeds DC",
+    "category": "inventory",
+    "severity": "critical",
+    "status": "open",
+    "detected_at": "2026-11-13T13:43:15.078617Z",
+    "owner": "Operations team",
+    "source_system": "Odoo · Shopify",
+    "rule_id": "inventory.stockout_risk",
+    "rule_version": 1,
+    "summary": "HV-GLV-220 will run out around 19 Nov, 8 days before the next scheduled delivery.",
+    "why_it_matters": "On-hand stock covers 6.7 days of demand, but replenishment takes 9 days. Without action, open customer orders for this SKU cannot be fulfilled from Leeds DC.",
+    "recommended_action": "Raise a purchase request for 2,000 units from Brightline Safety Supplies (£9,700). Requests above £5,000 need Finance Manager approval.",
+    "assumptions": [
+     "Demand over the next 9 days matches the 28-day average of 186 units per day.",
+     "Brightline's 9-day lead time holds for a new order."
+    ],
+    "limitations": [
+     "PO-10482 (2,000 units, due 27 Nov) is excluded because it arrives after the lead-time window. Expediting it may be an alternative; Odoo has no supplier confirmation for an earlier date."
+    ],
+    "evidence": [
+     {
+      "label": "On hand, Leeds DC",
+      "value": "1,240 units",
+      "source": "Odoo · stock levels"
+     },
+     {
+      "label": "Average daily demand (28 d)",
+      "value": "186 units (σ 41)",
+      "source": "Shopify + Odoo sales"
+     },
+     {
+      "label": "Supplier lead time",
+      "value": "9 days",
+      "source": "Odoo · Brightline Safety Supplies"
+     },
+     {
+      "label": "Inbound within lead time",
+      "value": "0 units",
+      "source": "Odoo · purchase orders"
+     },
+     {
+      "label": "Safety stock (95% service level)",
+      "value": "203 units",
+      "source": "1.65 × 41 × √9"
+     },
+     {
+      "label": "Reorder point",
+      "value": "1,877 units",
+      "source": "186 × 9 + 203"
+     },
+     {
+      "label": "Days of cover",
+      "value": "6.7 days",
+      "source": "1,240 ÷ 186"
+     },
+     {
+      "label": "Recommended order",
+      "value": "2,000 units · £9,700",
+      "source": "Reorder point + 7-day review − on hand, rounded to pack of 100"
+     }
+    ],
+    "explanation_generated_by": "model",
+    "explanation_model": "demo-model"
+   },
+   {
+    "id": "demo_ins_2038",
+    "ref": "INS-2038",
+    "title": "Supplier delivery overdue: PO-10391 corrugated cartons",
+    "category": "procurement",
+    "severity": "high",
+    "status": "acknowledged",
+    "detected_at": "2026-11-12T11:49:15.078617Z",
+    "owner": "Procurement team",
+    "source_system": "Odoo",
+    "rule_id": "procurement.po_overdue",
+    "rule_version": 1,
+    "summary": "Kestrel Packaging has not delivered PO-10391, which was due 3 business days ago.",
+    "why_it_matters": "Cartons from this order are scheduled for 3 outbound waves at Bristol DC. Kestrel has 4 open orders worth £18,240.",
+    "recommended_action": "Confirm a delivery date with Kestrel Packaging, or source from the approved alternate supplier.",
+    "assumptions": [
+     "Odoo receipt records are up to date for Bristol DC."
+    ],
+    "limitations": [
+     "Carrier tracking data is not connected, so in-transit status is unknown."
+    ],
+    "evidence": [
+     {
+      "label": "Expected receipt",
+      "value": "3 business days ago",
+      "source": "Odoo · PO-10391"
+     },
+     {
+      "label": "Supplier on-time rate (90 d)",
+      "value": "78% vs 94% average",
+      "source": "Odoo · receipts"
+     },
+     {
+      "label": "Open orders with supplier",
+      "value": "4 · £18,240",
+      "source": "Odoo · purchase orders"
+     }
+    ],
+    "explanation_generated_by": "template",
+    "explanation_model": null
+   },
+   {
+    "id": "demo_ins_2035",
+    "ref": "INS-2035",
+    "title": "Demand shift: hi-vis vests at Bristol DC",
+    "category": "inventory",
+    "severity": "medium",
+    "status": "open",
+    "detected_at": "2026-11-13T08:49:15.078617Z",
+    "owner": null,
+    "source_system": "Shopify",
+    "rule_id": "inventory.demand_shift",
+    "rule_version": 1,
+    "summary": "7-day demand for HV-VST-104 is 2.4× its 28-day average.",
+    "why_it_matters": "If the shift persists, stock reaches the reorder point in 11 days instead of 26.",
+    "recommended_action": "Review the reorder point for HV-VST-104 and confirm whether the increase is seasonal.",
+    "assumptions": [
+     "The spike is not caused by a single bulk order."
+    ],
+    "limitations": [
+     "Fewer than 14 days at the new level; treat as low confidence."
+    ],
+    "evidence": [
+     {
+      "label": "Demand, last 7 days",
+      "value": "61 units / day",
+      "source": "Shopify · orders"
+     },
+     {
+      "label": "Demand, 28-day average",
+      "value": "25 units / day",
+      "source": "Shopify · orders"
+     },
+     {
+      "label": "On hand, Bristol DC",
+      "value": "1,610 units",
+      "source": "Odoo · stock levels"
+     }
+    ],
+    "explanation_generated_by": "model",
+    "explanation_model": "demo-model"
+   }
+  ]
+ },
+ "approvals": {
+  "state": "ready",
+  "provenance": "demo",
+  "as_of": "2026-11-13T13:49:15.078617Z",
+  "message": null,
+  "available_in_phase": null,
+  "data": [
+   {
+    "id": "demo_apr_3305",
+    "ref": "PR-3305",
+    "title": "Pallet wrap film, 23 μm",
+    "requester": "Daniel Reyes",
+    "amount": 6480.0,
+    "currency": "GBP",
+    "policy": "Above £5,000 · Finance Manager",
+    "requested_at": "2026-11-13T08:49:15.078617Z",
+    "related_insight_ref": null
+   },
+   {
+    "id": "demo_apr_3302",
+    "ref": "PR-3302",
+    "title": "Forklift battery replacement, Leeds DC",
+    "requester": "Priya Nair",
+    "amount": 14900.0,
+    "currency": "GBP",
+    "policy": "Above £10,000 · Operations Director",
+    "requested_at": "2026-11-12T11:49:15.078617Z",
+    "related_insight_ref": null
+   },
+   {
+    "id": "demo_apr_3299",
+    "ref": "PR-3299",
+    "title": "Cartons 600×400 from alternate supplier",
+    "requester": "Tom Achebe",
+    "amount": 3120.0,
+    "currency": "GBP",
+    "policy": "New supplier · Procurement Manager",
+    "requested_at": "2026-11-13T10:49:15.078617Z",
+    "related_insight_ref": "INS-2038"
+   },
+   {
+    "id": "demo_apr_0412",
+    "ref": "TR-0412",
+    "title": "Stock transfer Bristol DC → Leeds DC",
+    "requester": "Amara Okafor",
+    "amount": 2310.0,
+    "currency": "GBP",
+    "policy": "Transfers above 500 units · Warehouse Manager",
+    "requested_at": "2026-11-13T13:04:15.078617Z",
+    "related_insight_ref": null
+   }
+  ]
+ },
+ "incidents": {
+  "state": "ready",
+  "provenance": "demo",
+  "as_of": "2026-11-13T13:49:15.078617Z",
+  "message": null,
+  "available_in_phase": null,
+  "data": {
+   "critical": 1,
+   "high": 1,
+   "medium": 1,
+   "low": 0
+  }
+ },
+ "fill_rate": {
+  "state": "ready",
+  "provenance": "demo",
+  "as_of": "2026-11-13T13:49:15.078617Z",
+  "message": null,
+  "available_in_phase": null,
+  "data": {
+   "target": 97.0,
+   "points": [
+    {
+     "date": "2026-11-07",
+     "value": 97.4
+    },
+    {
+     "date": "2026-11-08",
+     "value": 96.8
+    },
+    {
+     "date": "2026-11-09",
+     "value": 96.9
+    },
+    {
+     "date": "2026-11-10",
+     "value": 96.5
+    },
+    {
+     "date": "2026-11-11",
+     "value": 96.7
+    },
+    {
+     "date": "2026-11-12",
+     "value": 95.8
+    },
+    {
+     "date": "2026-11-13",
+     "value": 95.3
+    }
+   ]
+  }
+ },
+ "inventory_risk": {
+  "state": "ready",
+  "provenance": "demo",
+  "as_of": "2026-11-13T13:49:15.078617Z",
+  "message": null,
+  "available_in_phase": null,
+  "data": [
+   {
+    "location": "Leeds DC",
+    "skus_at_risk": 14,
+    "skus_tracked": 2140
+   },
+   {
+    "location": "Felixstowe port store",
+    "skus_at_risk": 9,
+    "skus_tracked": 1120
+   },
+   {
+    "location": "Bristol DC",
+    "skus_at_risk": 6,
+    "skus_tracked": 1860
+   },
+   {
+    "location": "Glasgow cross-dock",
+    "skus_at_risk": 3,
+    "skus_tracked": 640
+   }
+  ]
+ },
+ "workflows": {
+  "state": "ready",
+  "provenance": "demo",
+  "as_of": "2026-11-13T13:49:15.078617Z",
+  "message": null,
+  "available_in_phase": null,
+  "data": [
+   {
+    "workflow": "Purchase request approval",
+    "running": 5,
+    "awaiting_approval": 4,
+    "failed_24h": 0,
+    "completed": 38,
+    "success_rate": 97.4
+   },
+   {
+    "workflow": "Supplier delivery follow-up",
+    "running": 4,
+    "awaiting_approval": 0,
+    "failed_24h": 1,
+    "completed": 61,
+    "success_rate": 95.1
+   },
+   {
+    "workflow": "Inter-site stock transfer",
+    "running": 3,
+    "awaiting_approval": 0,
+    "failed_24h": 0,
+    "completed": 22,
+    "success_rate": 100.0
+   }
+  ]
+ },
+ "integrations": {
+  "state": "ready",
+  "provenance": "demo",
+  "as_of": "2026-11-13T13:49:15.078617Z",
+  "message": null,
+  "available_in_phase": null,
+  "data": [
+   {
+    "id": "demo_int_odoo",
+    "name": "Odoo",
+    "system": "Inventory and purchasing",
+    "status": "healthy",
+    "last_sync_at": "2026-11-13T13:45:15.078617Z",
+    "detail": "Products, stock, purchase orders, suppliers"
+   },
+   {
+    "id": "demo_int_shopify",
+    "name": "Shopify",
+    "system": "Sales channel",
+    "status": "degraded",
+    "last_sync_at": "2026-11-13T12:37:15.078617Z",
+    "detail": "Access token expires in 3 days. Reconnect to keep orders flowing."
+   }
+  ]
+ },
+ "activity": {
+  "state": "ready",
+  "provenance": "demo",
+  "as_of": "2026-11-13T13:49:15.078617Z",
+  "message": null,
+  "available_in_phase": null,
+  "data": [
+   {
+    "id": "demo_ev_0",
+    "at": "2026-11-13T13:45:15.078617Z",
+    "actor_type": "integration",
+    "actor": "Odoo",
+    "message": "Synchronised 1,284 stock records for Leeds DC and Bristol DC",
+    "ref": null
+   },
+   {
+    "id": "demo_ev_1",
+    "at": "2026-11-13T13:43:15.078617Z",
+    "actor_type": "system",
+    "actor": "Detection",
+    "message": "Raised stockout risk for HV-GLV-220",
+    "ref": "INS-2041"
+   },
+   {
+    "id": "demo_ev_2",
+    "at": "2026-11-13T13:11:15.078617Z",
+    "actor_type": "user",
+    "actor": "Priya Nair",
+    "message": "Approved purchase request (£2,140)",
+    "ref": "PR-3296"
+   },
+   {
+    "id": "demo_ev_3",
+    "at": "2026-11-13T13:04:15.078617Z",
+    "actor_type": "user",
+    "actor": "Amara Okafor",
+    "message": "Requested stock transfer Bristol DC → Leeds DC",
+    "ref": "TR-0412"
+   },
+   {
+    "id": "demo_ev_4",
+    "at": "2026-11-13T12:37:15.078617Z",
+    "actor_type": "integration",
+    "actor": "Shopify",
+    "message": "Sync completed with a warning: access token expires in 3 days",
+    "ref": null
+   },
+   {
+    "id": "demo_ev_5",
+    "at": "2026-11-13T10:49:15.078617Z",
+    "actor_type": "user",
+    "actor": "Tom Achebe",
+    "message": "Escalated overdue delivery to an incident",
+    "ref": "INC-0117"
+   },
+   {
+    "id": "demo_ev_6",
+    "at": "2026-11-13T06:49:15.078617Z",
+    "actor_type": "system",
+    "actor": "Workflows",
+    "message": "Purchase order PO-10488 created in Odoo after approval",
+    "ref": "PR-3290"
+   }
+  ]
+ },
+ "team": {
+  "state": "ready",
+  "provenance": "live",
+  "as_of": "2026-11-13T13:49:15.078617Z",
+  "message": null,
+  "available_in_phase": null,
+  "data": {
+   "members": 1,
+   "pending_invitations": 0,
+   "mfa_enabled": 0,
+   "recent_joins": [
+    {
+     "name": "Olu Owner",
+     "role_name": "Owner",
+     "joined_at": "2026-11-13T13:49:15.031860Z"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "operon-ai",
+  "private": true,
+  "packageManager": "pnpm@10.28.0",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "dev:web": "pnpm --filter @operon/web dev",
+    "build:web": "pnpm --filter @operon/web build",
+    "lint:web": "pnpm --filter @operon/web lint",
+    "typecheck:web": "pnpm --filter @operon/web typecheck",
+    "test:web": "pnpm --filter @operon/web test"
+  }
+}

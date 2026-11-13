@@ -1,0 +1,198 @@
+{
+ "organisation": {
+  "id": "01a1d52b-67e2-771c-b8c9-73ab9fdc6eb3",
+  "name": "Acme Distribution",
+  "is_demo": false
+ },
+ "viewer": {
+  "name": "Bo Lin",
+  "role_key": "viewer",
+  "role_name": "Viewer"
+ },
+ "layout": {
+  "preset": "operations",
+  "name": "Operations",
+  "is_default": true,
+  "sections": [
+   {
+    "key": "getting_started",
+    "size": "wide"
+   },
+   {
+    "key": "activity",
+    "size": "narrow"
+   },
+   {
+    "key": "insights",
+    "size": "wide"
+   },
+   {
+    "key": "approvals",
+    "size": "narrow"
+   },
+   {
+    "key": "incidents",
+    "size": "narrow"
+   },
+   {
+    "key": "fill_rate",
+    "size": "wide"
+   },
+   {
+    "key": "inventory_risk",
+    "size": "narrow"
+   },
+   {
+    "key": "workflows",
+    "size": "wide"
+   },
+   {
+    "key": "integrations",
+    "size": "narrow"
+   },
+   {
+    "key": "team",
+    "size": "narrow"
+   }
+  ]
+ },
+ "period": "7d",
+ "generated_at": "2026-11-13T13:49:14.305238Z",
+ "indicators": [
+  {
+   "key": "integrations",
+   "label": "Integrations connected",
+   "value": null,
+   "total": null,
+   "previous_value": null,
+   "increase_is": "neutral",
+   "state": "neutral",
+   "detail": "No systems connected yet",
+   "provenance": "unavailable"
+  },
+  {
+   "key": "open_insights",
+   "label": "Open insights",
+   "value": null,
+   "total": null,
+   "previous_value": null,
+   "increase_is": "neutral",
+   "state": "neutral",
+   "detail": "Detection starts once data flows",
+   "provenance": "unavailable"
+  }
+ ],
+ "getting_started": {
+  "state": "ready",
+  "provenance": "live",
+  "as_of": "2026-11-13T13:49:14.305238Z",
+  "message": null,
+  "available_in_phase": null,
+  "data": [
+   {
+    "key": "mfa",
+    "title": "Protect your account with two-factor authentication",
+    "body": "Required by many organisations, and the best defence against stolen passwords.",
+    "done": false,
+    "available": true,
+    "href": "/account/security",
+    "action_label": "Set up"
+   },
+   {
+    "key": "team",
+    "title": "Invite your team",
+    "body": "Give colleagues the role that matches what they need to do.",
+    "done": false,
+    "available": false,
+    "href": "/admin/members",
+    "action_label": "Invite people"
+   },
+   {
+    "key": "integrations",
+    "title": "Connect your inventory and sales systems",
+    "body": "Connect Odoo or Shopify, or import CSV files. Operational insights start once data flows.",
+    "done": false,
+    "available": false,
+    "href": "/integrations",
+    "action_label": "Connect a system"
+   }
+  ]
+ },
+ "insights": {
+  "state": "unavailable",
+  "provenance": "unavailable",
+  "as_of": null,
+  "message": "Insights appear once a connected system supplies data.",
+  "available_in_phase": null,
+  "data": null
+ },
+ "approvals": {
+  "state": "restricted",
+  "provenance": "unavailable",
+  "as_of": null,
+  "message": "Requires workflows.read.",
+  "available_in_phase": null,
+  "data": null
+ },
+ "incidents": {
+  "state": "ready",
+  "provenance": "live",
+  "as_of": "2026-11-13T13:49:14.305238Z",
+  "message": null,
+  "available_in_phase": null,
+  "data": {
+   "critical": 0,
+   "high": 0,
+   "medium": 0,
+   "low": 0
+  }
+ },
+ "fill_rate": {
+  "state": "unavailable",
+  "provenance": "unavailable",
+  "as_of": null,
+  "message": "Fill rate needs customer order lines, which the current integrations don't import yet.",
+  "available_in_phase": null,
+  "data": null
+ },
+ "inventory_risk": {
+  "state": "unavailable",
+  "provenance": "unavailable",
+  "as_of": null,
+  "message": "Needs stock levels from a connected system.",
+  "available_in_phase": null,
+  "data": null
+ },
+ "workflows": {
+  "state": "restricted",
+  "provenance": "unavailable",
+  "as_of": null,
+  "message": "Requires workflows.read.",
+  "available_in_phase": null,
+  "data": null
+ },
+ "integrations": {
+  "state": "restricted",
+  "provenance": "unavailable",
+  "as_of": null,
+  "message": "Requires integrations.read.",
+  "available_in_phase": null,
+  "data": null
+ },
+ "activity": {
+  "state": "restricted",
+  "provenance": "unavailable",
+  "as_of": null,
+  "message": "Requires audit.read.",
+  "available_in_phase": null,
+  "data": null
+ },
+ "team": {
+  "state": "restricted",
+  "provenance": "unavailable",
+  "as_of": null,
+  "message": "Requires members.read.",
+  "available_in_phase": null,
+  "data": null
+ }
+}

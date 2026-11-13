@@ -1,0 +1,155 @@
+@import "tailwindcss";
+@import "./tokens.css";
+
+/* Expose tokens to Tailwind utilities (bg-surface-raised, text-text-muted, ...). */
+@theme inline {
+  --color-*: initial;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+  --color-deep-sea: var(--color-deep-sea);
+  --color-harbour: var(--color-harbour);
+  --color-ocean: var(--color-ocean);
+  --color-slate: var(--color-slate);
+  --color-sky: var(--color-sky);
+  --color-shallows: var(--color-shallows);
+  --color-mist: var(--color-mist);
+  --color-foam: var(--color-foam);
+  --color-cloud: var(--color-cloud);
+  --color-white: var(--color-white);
+  --color-haze: var(--color-haze);
+
+  --color-canvas: var(--surface-canvas);
+  --color-raised: var(--surface-raised);
+  --color-sunken: var(--surface-sunken);
+  --color-selected: var(--surface-selected);
+  --color-nav: var(--surface-nav);
+  --color-nav-hover: var(--surface-nav-hover);
+  --color-nav-active: var(--surface-nav-active);
+  --color-brand: var(--surface-brand);
+  --color-brand-soft: var(--surface-brand-soft);
+
+  --color-ink: var(--text-primary);
+  --color-ink-secondary: var(--text-secondary);
+  --color-ink-muted: var(--text-muted);
+  --color-ink-inverse: var(--text-inverse);
+  --color-ink-nav: var(--text-nav);
+  --color-ink-nav-muted: var(--text-nav-muted);
+  --color-ink-nav-active: var(--text-nav-active);
+  --color-ink-brand-muted: var(--text-brand-muted);
+
+  --color-line: var(--border-subtle);
+  --color-line-control: var(--border-control);
+  --color-line-nav: var(--border-nav);
+  --color-icon: var(--color-steel);
+
+  --color-primary: var(--action-primary);
+  --color-primary-hover: var(--action-primary-hover);
+  --color-accent: var(--action-accent);
+
+  --color-success: var(--color-success);
+  --color-success-bg: var(--color-success-bg);
+  --color-warning: var(--color-warning);
+  --color-warning-bg: var(--color-warning-bg);
+  --color-danger: var(--color-danger);
+  --color-danger-bg: var(--color-danger-bg);
+  --color-danger-hover: var(--color-danger-hover);
+  --color-info: var(--color-info);
+  --color-info-bg: var(--color-info-bg);
+
+  --font-sans: var(--font-ui);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-data);
+
+  --radius-control: var(--radius-control);
+  --radius-panel: var(--radius-panel);
+  --radius-dialog: var(--radius-dialog);
+
+  --shadow-popover: var(--shadow-popover);
+  --shadow-dialog: var(--shadow-dialog);
+
+  --ease-standard: var(--ease-standard);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background: var(--surface-canvas);
+    color: var(--text-primary);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+  .on-nav :focus-visible {
+    outline-color: var(--focus-ring-inverse);
+  }
+  ::selection {
+    background: var(--color-mist);
+    color: var(--color-deep-sea);
+  }
+}
+
+@utility tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+@utility transition-standard {
+  transition-duration: var(--duration-base);
+  transition-timing-function: var(--ease-standard);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes dialog-in {
+  from { opacity: 0; transform: translate(-50%, 4px) scale(0.99); }
+  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+@keyframes drawer-in-left {
+  from { transform: translateX(-16px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes drawer-in-right {
+  from { transform: translateX(16px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* Unlayered, so it wins over Tailwind's padding utilities inside cards. */
+/* Flat sections align their content with the page edge instead of a card's padding. */
+.flat-section > header,
+.flat-section > div,
+.flat-section > ol,
+.flat-section > form {
+  padding-left: 0;
+  padding-right: 0;
+}
+.flat-section > ol > li {
+  padding-left: 0;
+  padding-right: 0;
+}
+.flat-section th:first-child,
+.flat-section td:first-child {
+  padding-left: 0;
+}
+.flat-section th:last-child,
+.flat-section td:last-child {
+  padding-right: 0;
+}

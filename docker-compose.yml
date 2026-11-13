@@ -1,0 +1,119 @@
+# Operon AI — local development stack.
+#   docker compose up --build
+# Web: http://localhost:3000   API docs: http://localhost:8000/api/v1/docs
+# Mail: http://localhost:8025 (Mailpit catches every email: verification, invitations, resets)
+# Temporal UI: http://localhost:8233 (workflows, schedules, sync history).
+name: operon
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_SUPERUSER_PASSWORD:-postgres_dev}
+    ports: ["5432:5432"]
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./infrastructure/database/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d operon"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  temporal:
+    # Temporal development server (single binary, SQLite). Production uses Temporal Cloud or a
+    # self-hosted cluster (ADR 0003).
+    image: temporalio/temporal:1.8.3
+    command: ["server", "start-dev", "--ip", "0.0.0.0", "--ui-port", "8233",
+              "--db-filename", "/data/temporal.db"]
+    ports: ["7233:7233", "8233:8233"]
+    volumes:
+      - temporal-data:/data
+    healthcheck:
+      test: ["CMD", "temporal", "operator", "cluster", "health", "--address", "localhost:7233"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  mailpit:
+    image: axllent/mailpit:v1.27
+    ports: ["8025:8025", "1025:1025"]
+
+  migrate:
+    build: ./apps/api
+    command: ["alembic", "upgrade", "head"]
+    environment:
+      OPERON_MIGRATIONS_DATABASE_URL: postgresql+psycopg://operon_owner:operon_owner_dev@postgres:5432/operon
+    depends_on:
+      postgres: { condition: service_healthy }
+    restart: "no"
+
+  api:
+    build: ./apps/api
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      OPERON_ENVIRONMENT: development
+      OPERON_DATABASE_URL: postgresql+asyncpg://operon_app:operon_app_dev@postgres:5432/operon
+      OPERON_REDIS_URL: redis://redis:6379/0
+      OPERON_WEB_BASE_URL: http://localhost:3000
+      OPERON_EMAIL_BACKEND: smtp
+      OPERON_SMTP_HOST: mailpit
+      OPERON_SMTP_PORT: "1025"
+      OPERON_WORKFLOW_BACKEND: temporal
+      OPERON_TEMPORAL_ADDRESS: temporal:7233
+    ports: ["8000:8000"]
+    depends_on:
+      mailpit: { condition: service_started }
+      migrate: { condition: service_completed_successfully }
+      redis: { condition: service_healthy }
+      temporal: { condition: service_healthy }
+
+  worker:
+    # Runs integration syncs (Temporal activities). Scale with `--scale worker=N`.
+    build: ./apps/api
+    command: ["python", "-m", "operon.workers.integrations"]
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      OPERON_ENVIRONMENT: development
+      OPERON_DATABASE_URL: postgresql+asyncpg://operon_app:operon_app_dev@postgres:5432/operon
+      OPERON_REDIS_URL: redis://redis:6379/0
+      OPERON_EMAIL_BACKEND: smtp
+      OPERON_SMTP_HOST: mailpit
+      OPERON_SMTP_PORT: "1025"
+      OPERON_WORKFLOW_BACKEND: temporal
+      OPERON_TEMPORAL_ADDRESS: temporal:7233
+    healthcheck:
+      disable: true
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      temporal: { condition: service_healthy }
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_OPERON_DATA_SOURCE: ${NEXT_PUBLIC_OPERON_DATA_SOURCE:-api}
+    environment:
+      OPERON_API_ORIGIN: http://api:8000
+    ports: ["3000:3000"]
+    depends_on:
+      api: { condition: service_healthy }
+
+volumes:
+  postgres-data:
+  temporal-data:

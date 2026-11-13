@@ -1,0 +1,68 @@
+{
+ "current": {
+  "preset": "executive",
+  "name": "Executive",
+  "is_default": true,
+  "sections": [
+   {
+    "key": "getting_started",
+    "size": "wide"
+   },
+   {
+    "key": "insights",
+    "size": "wide"
+   },
+   {
+    "key": "incidents",
+    "size": "narrow"
+   },
+   {
+    "key": "team",
+    "size": "narrow"
+   },
+   {
+    "key": "fill_rate",
+    "size": "wide"
+   },
+   {
+    "key": "approvals",
+    "size": "narrow"
+   },
+   {
+    "key": "workflows",
+    "size": "wide"
+   },
+   {
+    "key": "integrations",
+    "size": "narrow"
+   },
+   {
+    "key": "activity",
+    "size": "narrow"
+   }
+  ]
+ },
+ "default_preset": "executive",
+ "presets": [
+  {
+   "key": "executive",
+   "name": "Executive",
+   "description": "Exceptions and trends across the organisation first."
+  },
+  {
+   "key": "operations",
+   "name": "Operations",
+   "description": "Exceptions and approvals first, then process health."
+  },
+  {
+   "key": "finance",
+   "name": "Finance",
+   "description": "Decisions waiting on you first, then spend-related exceptions."
+  },
+  {
+   "key": "warehouse",
+   "name": "Warehouse",
+   "description": "Stock risk by location and fulfilment first."
+  }
+ ]
+}
