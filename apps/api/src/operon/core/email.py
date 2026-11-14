@@ -1,10 +1,14 @@
-"""Outbound email. Console in development, SMTP in deployed environments, memory in tests."""
+"""Outbound email. Console in development, SMTP or Brevo's HTTPS API in deployed environments
+(the API for hosts that block SMTP ports), memory in tests."""
 
 import asyncio
 import smtplib
 from dataclasses import dataclass
 from email.message import EmailMessage as MimeMessage
+from email.utils import parseaddr
 from typing import Protocol
+
+import httpx
 
 from operon.core.config import Settings
 from operon.core.logging import get_logger
@@ -59,7 +63,40 @@ class SmtpEmailSender:
         await asyncio.to_thread(self._send_sync, message)
 
 
+class BrevoEmailSender:
+    """Brevo transactional email over HTTPS (port 443)."""
+
+    URL = "https://api.brevo.com/v3/smtp/email"
+
+    def __init__(self, settings: Settings, client: httpx.AsyncClient | None = None) -> None:
+        assert settings.brevo_api_key is not None
+        self._key = settings.brevo_api_key.get_secret_value()
+        name, address = parseaddr(settings.email_from)
+        self._sender = {"email": address, **({"name": name} if name else {})}
+        self._client = client
+
+    async def send(self, message: EmailMessage) -> None:
+        body = {
+            "sender": self._sender,
+            "to": [{"email": message.to}],
+            "subject": message.subject,
+            "textContent": message.text,
+        }
+        headers = {"api-key": self._key, "accept": "application/json"}
+        if self._client is not None:
+            response = await self._client.post(self.URL, json=body, headers=headers)
+        else:
+            async with httpx.AsyncClient(timeout=15) as client:
+                response = await client.post(self.URL, json=body, headers=headers)
+        if response.status_code >= 400:
+            # Never log the key; Brevo's error body names the problem (e.g. unverified sender).
+            log.warning("email_send_failed", provider="brevo", status=response.status_code)
+            response.raise_for_status()
+
+
 def create_email_sender(settings: Settings) -> EmailSender:
+    if settings.email_backend == "brevo":
+        return BrevoEmailSender(settings)
     if settings.email_backend == "smtp":
         return SmtpEmailSender(settings)
     if settings.email_backend == "memory":

@@ -58,13 +58,15 @@ class Settings(BaseSettings):
     password_hash_memory_kib: int = 65536
     password_hash_parallelism: int = 2
 
-    email_backend: Literal["console", "smtp", "memory"] = "console"
+    email_backend: Literal["console", "smtp", "brevo", "memory"] = "console"
     email_from: str = "Operon <no-reply@operon.local>"
     smtp_host: str = "localhost"
     smtp_port: int = 1025
     smtp_username: str | None = None
     smtp_password: SecretStr | None = None
     smtp_starttls: bool = False
+    # Brevo's transactional email API over HTTPS, for hosts that block SMTP ports.
+    brevo_api_key: SecretStr | None = None
 
     # Integrations and background work (ADR 0003, ADR 0010).
     # "inline" runs syncs in-process (development/test only); "temporal" starts durable workflows.
@@ -118,10 +120,12 @@ class Settings(BaseSettings):
                 raise ValueError(
                     "Private integration hosts are only allowed in development and test."
                 )
-            if self.email_backend != "smtp":
+            if self.email_backend not in ("smtp", "brevo"):
                 raise ValueError(
-                    "OPERON_EMAIL_BACKEND must be 'smtp' outside development and test."
+                    "OPERON_EMAIL_BACKEND must be 'smtp' or 'brevo' outside development and test."
                 )
+        if self.email_backend == "brevo" and self.brevo_api_key is None:
+            raise ValueError("OPERON_BREVO_API_KEY is required with OPERON_EMAIL_BACKEND=brevo.")
         return self
 
 
