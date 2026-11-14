@@ -22,6 +22,7 @@ from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from operon.access.context import Actor
+from operon.core import telemetry
 from operon.core.db import Database, set_rls_context
 from operon.core.logging import get_logger
 from operon.modules.audit import service as audit
@@ -302,6 +303,7 @@ async def record_completion(
             return
         e.result = result
         e.status = "completed"
+        telemetry.WORKFLOWS.add(1, {"status": "completed", "target": result["mode"]})
         e.error = None
         e.next_wake_at = None
         e.completed_at = now
@@ -375,6 +377,7 @@ async def _attempt_failed(
             return Step(False, e.next_wake_at)
         e.status = "failed"
         e.next_wake_at = None
+        telemetry.WORKFLOWS.add(1, {"status": "failed"})
         s.add(
             event(
                 e,

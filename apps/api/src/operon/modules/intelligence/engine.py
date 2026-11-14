@@ -13,6 +13,7 @@ from uuid import UUID
 from sqlalchemy import delete, func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from operon.core import telemetry
 from operon.core.db import Database, set_rls_context
 from operon.core.logging import get_logger
 from operon.modules.ai import service as ai
@@ -187,6 +188,7 @@ async def reconcile(
         await _replace_evidence(s, insight, f, delete_first=False)
         s.add(insight_event(insight, "detected", {"severity": f.severity, "metrics": f.metrics}))
         counts["raised"] += 1
+        telemetry.INSIGHTS_RAISED.add(1, {"rule": rule_id, "severity": f.severity})
         if f.severity in NOTIFY_SEVERITIES:
             notify_ids.append(insight)
     await s.flush()

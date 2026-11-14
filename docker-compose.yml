@@ -108,8 +108,7 @@ services:
       dockerfile: apps/web/Dockerfile
       args:
         NEXT_PUBLIC_OPERON_DATA_SOURCE: ${NEXT_PUBLIC_OPERON_DATA_SOURCE:-api}
-    environment:
-      OPERON_API_ORIGIN: http://api:8000
+        OPERON_API_ORIGIN: http://api:8000
     ports: ["3000:3000"]
     depends_on:
       api: { condition: service_healthy }

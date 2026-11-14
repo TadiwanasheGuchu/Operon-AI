@@ -19,6 +19,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from operon.access.context import TenantContext
+from operon.core import telemetry
 from operon.core.db import Database, set_rls_context
 from operon.core.errors import ApiError
 from operon.core.logging import get_logger
@@ -328,4 +329,8 @@ async def run(db: Database, registry: ProviderRegistry, spec: RunSpec) -> RunRes
         e.output_tokens = totals["out"]
         e.summary = text[:8000] if text else None
         e.finished_at = datetime.now(UTC)
+    telemetry.AGENT_RUNS.add(1, {"kind": spec.kind, "status": status})
+    telemetry.MODEL_TOKENS.add(
+        totals["in"] + totals["out"], {"kind": spec.kind, "provider": provider.name}
+    )
     return RunResult(execution_id, status, text, stop, citations, "\n".join(tool_texts))

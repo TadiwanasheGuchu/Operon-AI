@@ -19,5 +19,6 @@ One file per decision: **Context**, **Decision**, **Consequences**, **Status**
 | [0012](0012-approval-workflows.md) | Approval workflows: idempotent state machine on Temporal | Accepted |
 | [0013](0013-sky-palette.md) | Harbour-and-sky palette, light sidebar, fewer cards | Accepted |
 | [0014](0014-assistant-and-agents.md) | Assistant and agents: typed tools, code-enforced limits, human approval | Accepted |
+| [0015](0015-enterprise-readiness.md) | Enterprise readiness: SSO, governance, telemetry, recovery and deployment | Accepted |
 
 Open: hosting target (affects KMS, managed Postgres, Temporal Cloud vs self-hosted).

@@ -10,11 +10,17 @@ import httpx
 from sqlalchemy import select, text, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from operon.core import telemetry
 from operon.core.config import Settings
 from operon.core.crypto import SecretBox
 from operon.core.db import Database, set_rls_context
 from operon.core.logging import get_logger
-from operon.core.net import UnsafeUrlError, validate_outbound_url
+from operon.core.net import (
+    GuardedTransport,
+    UnsafeUrlError,
+    outbound_proxy_configured,
+    validate_outbound_url,
+)
 from operon.modules.integrations import credentials
 from operon.modules.integrations.connectors.base import (
     SNAPSHOT_ENTITIES,
@@ -70,11 +76,16 @@ class SyncRuntime:
 
 
 def default_http_factory(settings: Settings) -> HttpFactory:
+    # Connect-time address checks, unless private hosts are allowed (development) or an egress
+    # proxy makes the connections (then the proxy must block private ranges; see deployment docs).
+    guarded = not settings.allow_private_integration_hosts and not outbound_proxy_configured()
+
     def factory() -> httpx.AsyncClient:
         return httpx.AsyncClient(
             timeout=settings.integration_http_timeout_seconds,
             follow_redirects=False,
             headers={"User-Agent": "Operon-Integrations/1.0"},
+            transport=GuardedTransport() if guarded else None,
         )
 
     return factory
@@ -189,6 +200,7 @@ async def _run(
             kind=type(exc).__name__,
         )
         await _finish(rt, org, connection_id, job_id, previous_status, stats, exc)
+        telemetry.SYNCS.add(1, {"outcome": "failed", "kind": type(exc).__name__})
         return SyncOutcome("failed", job_id, stats, exc.user_message, exc.retryable)
     except Exception as exc:
         log.exception("sync_crashed", connection_id=str(connection_id))
@@ -198,6 +210,7 @@ async def _run(
         return SyncOutcome("failed", job_id, stats, err.user_message, True)
 
     await _finish(rt, org, connection_id, job_id, previous_status, stats, None)
+    telemetry.SYNCS.add(1, {"outcome": "succeeded"})
     return SyncOutcome("succeeded", job_id, stats)
 
 

@@ -19,6 +19,16 @@ import { AuthHeading } from "./auth-heading";
 
 type LoginValues = z.infer<typeof loginSchema>;
 
+/** Messages for the `sso_error` the API's callback redirects back with. */
+const SSO_ERRORS: Record<string, string> = {
+  denied: "Your identity provider didn't approve the sign-in.",
+  invalid: "The sign-in response was incomplete. Start again.",
+  sso_state_invalid: "That sign-in link expired. Start again.",
+  sso_failed: "Single sign-on didn't complete. Try again.",
+  not_a_member: "You aren't a member of this organisation yet. Ask an administrator to invite you.",
+  account_disabled: "This account is disabled.",
+};
+
 export function LoginForm() {
   const params = useSearchParams();
   const router = useRouter();
@@ -27,6 +37,23 @@ export function LoginForm() {
   const [error, setError] = useState<ApiRequestError | Error | null>(null);
   const [email, setEmail] = useState("");
   const [resent, setResent] = useState(false);
+  const [ssoBusy, setSsoBusy] = useState(false);
+
+  async function startSso(address: string) {
+    setError(null);
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(address)) {
+      setError(new Error("Enter your work email first, then choose single sign-on."));
+      return;
+    }
+    setSsoBusy(true);
+    try {
+      const r = await api.post<{ redirect_url: string }>("/auth/sso/start", { email: address }, { tenant: false });
+      window.location.assign(r.redirect_url);
+    } catch (e) {
+      setError(e as Error);
+      setSsoBusy(false);
+    }
+  }
 
   async function finish() {
     await queryClient.invalidateQueries({ queryKey: sessionKey });
@@ -65,6 +92,7 @@ export function LoginForm() {
   const code = error instanceof ApiRequestError ? error.code : null;
   const reset = params.get("reset") === "1";
   const verified = params.get("verified") === "1";
+  const ssoError = params.get("sso_error");
 
   if (step === "mfa") {
     return (
@@ -104,6 +132,9 @@ export function LoginForm() {
       <form onSubmit={form.handleSubmit(onPassword)} noValidate className="space-y-5">
         {reset ? <InlineAlert tone="success" title="Password changed. Sign in with your new password." /> : null}
         {verified ? <InlineAlert tone="success" title="Email confirmed. You can sign in now." /> : null}
+        {ssoError && !error ? (
+          <InlineAlert tone="danger" title={SSO_ERRORS[ssoError] ?? "Single sign-on didn't complete. Try again."} />
+        ) : null}
         {code === "email_not_verified" ? (
           <InlineAlert
             tone="warning"
@@ -144,6 +175,16 @@ export function LoginForm() {
         <Button type="submit" className="w-full" loading={form.formState.isSubmitting}>
           Sign in
         </Button>
+        <Button
+          type="button"
+          variant={code === "sso_required" ? "primary" : "secondary"}
+          className="w-full"
+          loading={ssoBusy}
+          onClick={() => startSso(form.getValues("email")?.trim() ?? "")}
+        >
+          Sign in with SSO
+        </Button>
+        <p className="text-center text-xs text-ink-muted">Single sign-on uses the email above; no password needed.</p>
       </form>
       <p className="mt-8 text-center text-sm text-ink-secondary">
         New to Operon?{" "}

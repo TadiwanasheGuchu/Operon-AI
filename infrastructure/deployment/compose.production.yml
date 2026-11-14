@@ -1,0 +1,105 @@
+# Operon AI — production/staging stack on a single Docker host (ADR 0015).
+#
+#   ./deploy.sh staging            # pulls the images for $OPERON_VERSION, migrates, rolls out
+#
+# Postgres, Redis and Temporal are external by default (managed services recommended). For a
+# small self-hosted deployment, start them with `--profile self-hosted` and point the URLs at them.
+# Only Caddy is exposed: it terminates TLS (automatic certificates) and serves the web app, which
+# proxies /api to the API on the internal network.
+name: operon
+
+x-app: &app
+  image: ghcr.io/${OPERON_IMAGE_OWNER:?}/operon-api:${OPERON_VERSION:?}
+  restart: unless-stopped
+  env_file: [ "${OPERON_ENV_FILE:?}" ]
+  environment:
+    OPERON_ENVIRONMENT: ${OPERON_ENVIRONMENT:-production}
+    OPERON_WORKFLOW_BACKEND: temporal
+  read_only: true
+  tmpfs: [ /tmp ]
+  security_opt: [ "no-new-privileges:true" ]
+  cap_drop: [ ALL ]
+
+services:
+  migrate:
+    <<: *app
+    command: ["alembic", "upgrade", "head"]
+    restart: "no"
+    profiles: [ migrate ]
+
+  api:
+    <<: *app
+    deploy:
+      replicas: ${OPERON_API_REPLICAS:-2}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health/ready').status==200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+
+  worker:
+    <<: *app
+    command: ["python", "-m", "operon.workers.integrations"]
+    environment:
+      OPERON_ENVIRONMENT: ${OPERON_ENVIRONMENT:-production}
+      OPERON_WORKFLOW_BACKEND: temporal
+      OPERON_SERVICE_NAME: operon-worker
+    deploy:
+      replicas: ${OPERON_WORKER_REPLICAS:-2}
+    healthcheck:
+      disable: true
+
+  web:
+    image: ghcr.io/${OPERON_IMAGE_OWNER:?}/operon-web:${OPERON_VERSION:?}
+    restart: unless-stopped
+    read_only: true
+    tmpfs: [ /tmp, /app/apps/web/.next/cache ]
+    security_opt: [ "no-new-privileges:true" ]
+    cap_drop: [ ALL ]
+    depends_on:
+      api: { condition: service_healthy }
+
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    ports: [ "80:80", "443:443" ]
+    environment:
+      OPERON_DOMAIN: ${OPERON_DOMAIN:?}
+      ACME_EMAIL: ${ACME_EMAIL:?}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+    depends_on: [ web ]
+
+  # --- optional self-hosted dependencies (use managed services where you can) -----------------
+  postgres:
+    image: postgres:16-alpine
+    profiles: [ self-hosted ]
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_SUPERUSER_PASSWORD:-}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ../database/init:/docker-entrypoint-initdb.d:ro
+  redis:
+    image: redis:7-alpine
+    profiles: [ self-hosted ]
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes: [ redis-data:/data ]
+  temporal:
+    image: temporalio/auto-setup:1.28
+    profiles: [ self-hosted ]
+    restart: unless-stopped
+    environment:
+      DB: postgres12
+      DB_PORT: 5432
+      POSTGRES_USER: ${TEMPORAL_DB_USER:-temporal}
+      POSTGRES_PWD: ${TEMPORAL_DB_PASSWORD:-}
+      POSTGRES_SEEDS: postgres
+
+volumes:
+  caddy-data:
+  postgres-data:
+  redis-data:

@@ -19,10 +19,17 @@ def _redact(_: Any, __: str, event_dict: MutableMapping[str, Any]) -> MutableMap
     return event_dict
 
 
+def _trace_ids(logger: Any, method: str, event_dict: MutableMapping[str, Any]) -> Any:
+    from operon.core.telemetry import add_trace_ids
+
+    return add_trace_ids(logger, method, event_dict)
+
+
 def configure_logging(level: str = "INFO", json: bool = True) -> None:
     processors: list[Any] = [
         structlog.contextvars.merge_contextvars,
         structlog.processors.add_log_level,
+        _trace_ids,
         structlog.processors.TimeStamper(fmt="iso", utc=True),
         _redact,
         structlog.processors.StackInfoRenderer(),

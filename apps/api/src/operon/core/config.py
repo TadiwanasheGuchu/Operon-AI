@@ -87,6 +87,8 @@ class Settings(BaseSettings):
     openai_model: str | None = None
     ai_timeout_seconds: float = 60.0
     ai_max_output_tokens: int = 4000
+    # OpenTelemetry export (OTLP/HTTP; endpoint from OTEL_EXPORTER_OTLP_ENDPOINT).
+    otel_enabled: bool = False
     # In-process periodic jobs (incident escalation) when workflow_backend is "inline".
     # 0 disables them (tests drive the jobs directly).
     inline_maintenance_interval_seconds: int = 60

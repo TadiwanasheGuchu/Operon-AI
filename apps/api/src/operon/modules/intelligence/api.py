@@ -5,6 +5,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, Query, Request
 
 from operon.access.context import TenantContext
 from operon.access.dependencies import MetaDep, require_permission
+from operon.core import usage_limits as usage
 from operon.core.deps import SessionDep
 from operon.core.errors import ApiError
 from operon.modules.ai import service as ai
@@ -255,6 +256,7 @@ async def regenerate_explanation(
     request: Request,
     background: BackgroundTasks,
 ) -> dict[str, str]:
+    await usage.hit(request, usage.EXPLAIN_PER_ORG, ctx.organisation_id)
     insight = await service.get_insight(session, ctx, insight_id)
     await service.request_explanation(session, insight)
     background.add_task(explain_insight, runtime(request), ctx.organisation_id, insight.id)
@@ -270,6 +272,7 @@ def _run_out(r: Any) -> DetectionRunOut:
 
 @router.post("/intelligence/run", response_model=DetectionRunOut)
 async def run_now(ctx: InsManage, request: Request) -> DetectionRunOut:
+    await usage.hit(request, usage.DETECTION_RUNS_PER_ORG, ctx.organisation_id)
     return _run_out(await run_detection(runtime(request), ctx.organisation_id, "manual"))
 
 

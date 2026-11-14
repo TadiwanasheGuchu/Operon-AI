@@ -136,14 +136,31 @@ The suite was mutation-tested: removing the membership check makes it fail; remo
 | Answers citing records or figures not in the tool outputs are flagged to the reader | `test_unsupported_figures_and_references_are_flagged` |
 | Run logs are append-only (`agent_execution_steps`, `agent_versions`) | migration 0007 |
 
+## Phase 7 additions (enterprise readiness, ADR 0015)
+
+See [`threat-model.md`](threat-model.md) for the review findings and residual risks.
+
+| Control | Proof |
+|---|---|
+| OIDC SSO: PKCE, single-use state bound to the starting browser, nonce, JWKS signature, issuer, audience and expiry, `email_verified`, verified-domain email | `test_sso.py` (13 tests) |
+| Domains are globally unique, proven by DNS TXT; public email domains refused | `test_a_verified_domain_cannot_be_claimed_by_another_organisation`, `test_configuration_requires_proof_of_domain` |
+| "Require SSO" blocks passwords for members at verified domains, except owners (break-glass) | `test_enforced_sso_blocks_passwords_except_for_owners` |
+| Outbound connections are pinned to the checked address (no DNS rebinding) | `test_net_guard.py` |
+| Usage limits on assistant, agent runs, detection, explanations, purchase requests, exports | `core/usage_limits.py` |
+| Request bodies capped (1 MB; uploads at the upload limit) | `core/body_limit.py` |
+| Retention can't go below its minimums, even through the database functions | `test_governance.py`, migration 0008 |
+| Export is tenant-scoped (RLS) and excludes secrets | `test_governance.py` |
+| CSP, HSTS, frame-ancestors none | `next.config.ts`, `infrastructure/deployment/Caddyfile` |
+| Four new tenant tables under RLS and in the isolation suite | `test_tenant_isolation.py` |
+
 ## Known gaps (tracked for later phases)
 
 - No breached-password check yet (planned: k-anonymity range lookup).
 - No WebAuthn/passkeys; TOTP only.
-- No SSO/SCIM (Phase 7, through the identity-provider boundary).
+- No SCIM or SAML (OIDC SSO only).
 - Email address changes aren't supported yet.
-- Audit retention and export policies are not defined.
 - Rate limits use fixed windows; a sliding window or token bucket would smooth bursts.
-- Outbound URL checks narrow but don't eliminate DNS rebinding; pinning the resolved address per
-  request (custom transport) is planned with the security review.
-- Integration secrets use an application key; KMS-wrapped per-record data keys are Phase 7.
+- Integration and SSO secrets use an application key ring; KMS-wrapped per-record data keys wait
+  on the hosting decision.
+- CSP permits inline scripts (Next.js hydration); see the threat model, R1.
+- No independent penetration test yet.

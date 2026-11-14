@@ -41,7 +41,7 @@ from operon.modules.operations.models import (
     SupplierProduct,
 )
 
-CHUNK = 500
+CHUNK = 5000
 
 
 @dataclass
@@ -86,12 +86,13 @@ class Store:
     async def _upsert(self, model: Any, rows: list[dict[str, Any]], update: Sequence[str]) -> None:
         for i in range(0, len(rows), CHUNK):
             chunk = rows[i : i + CHUNK]
-            stmt = insert(model).values(chunk)
+            stmt = insert(model)
             stmt = stmt.on_conflict_do_update(
                 index_elements=["connection_id", "external_id"],
                 set_={c: getattr(stmt.excluded, c) for c in [*update, "updated_at"]},
             )
-            await self.s.execute(stmt)
+            # executemany: one cached statement, batched by SQLAlchemy ("insertmanyvalues").
+            await self.s.execute(stmt, chunk)
         self._ids.pop(model, None)
 
     async def locations(self, records: Sequence[LocationRecord]) -> EntityStats:
@@ -217,7 +218,7 @@ class Store:
         )
         rows = list(merged.values())
         for i in range(0, len(rows), CHUNK):
-            await self.s.execute(insert(StockLevel).values(rows[i : i + CHUNK]))
+            await self.s.execute(insert(StockLevel), rows[i : i + CHUNK])
         stats.written = len(rows)
         return stats
 
@@ -258,7 +259,7 @@ class Store:
         )
         rows = list(merged.values())
         for i in range(0, len(rows), CHUNK):
-            await self.s.execute(insert(SalesDaily).values(rows[i : i + CHUNK]))
+            await self.s.execute(insert(SalesDaily), rows[i : i + CHUNK])
         stats.written = len(rows)
         return stats
 
@@ -307,7 +308,7 @@ class Store:
             row["quantity"] += r.quantity
         rows = list(merged.values())
         for i in range(0, len(rows), CHUNK):
-            await self.s.execute(insert(SalesDaily).values(rows[i : i + CHUNK]))
+            await self.s.execute(insert(SalesDaily), rows[i : i + CHUNK])
         stats.written = len(rows)
         return stats
 
@@ -381,7 +382,7 @@ class Store:
                     }
                 )
         for i in range(0, len(lines), CHUNK):
-            await self.s.execute(insert(PurchaseOrderLine).values(lines[i : i + CHUNK]))
+            await self.s.execute(insert(PurchaseOrderLine), lines[i : i + CHUNK])
         stats.written = len(rows)
         return stats
 

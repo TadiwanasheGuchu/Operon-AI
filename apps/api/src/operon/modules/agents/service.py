@@ -666,3 +666,45 @@ async def execution_detail(
         )
     )
     return e, steps
+
+
+STALE_AFTER = timedelta(minutes=40)  # longer than the longest allowed run (30 minutes) plus slack
+
+
+async def fail_stale_runs(db: Database, *, now: datetime | None = None) -> int:
+    """Runs still 'running' long after any limit would have stopped them were interrupted (for
+    example by a restart). Mark them failed so they don't look active forever."""
+    now = now or datetime.now(UTC)
+    async with db.sessionmaker() as s, s.begin():
+        rows = (
+            await s.execute(
+                text("SELECT id, organisation_id FROM operon_stale_agent_runs(:b)"),
+                {"b": now - STALE_AFTER},
+            )
+        ).all()
+    for run_id, org in rows:
+        async with db.sessionmaker() as s, s.begin():
+            await set_rls_context(s, organisation_id=org)
+            e = await s.get(AgentExecution, run_id, with_for_update=True)
+            if e is None or e.status != "running":
+                continue
+            e.status = "failed"
+            e.stop_reason = "interrupted"
+            e.error = "The run was interrupted (for example by a restart) and didn't finish."
+            e.finished_at = now
+            last = await s.scalar(
+                select(AgentExecutionStep.position)
+                .where(AgentExecutionStep.execution_id == e.id)
+                .order_by(AgentExecutionStep.position.desc())
+                .limit(1)
+            )
+            s.add(
+                AgentExecutionStep(
+                    organisation_id=org,
+                    execution_id=e.id,
+                    position=(last or 0) + 1,
+                    kind="error",
+                    message="Interrupted: marked failed by maintenance.",
+                )
+            )
+    return len(rows)

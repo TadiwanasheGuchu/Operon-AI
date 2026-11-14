@@ -20,6 +20,9 @@ import { useWorkspace } from "@/features/workspace/workspace-context";
 import { api, errorMessage } from "@/lib/api/client";
 import { formatDate } from "@/lib/format";
 
+import { ExportPanel, RetentionPanel } from "./data-governance";
+import { SsoPanel } from "./sso-panel";
+
 const schema = z.object({ name: z.string().trim().min(1, "Enter a name.").max(200) });
 
 export function OrganisationPage() {
@@ -29,7 +32,7 @@ export function OrganisationPage() {
 
   return (
     <PageContainer narrow>
-      <PageHeader title="Organisation" description="Name and security policy for this organisation." />
+      <PageHeader title="Organisation" description="Name, security policy, single sign-on and data governance for this organisation." />
       {current.isPending ? (
         <Panel className="mt-6 space-y-3 p-5">
           <Skeleton className="h-4 w-40" />
@@ -43,6 +46,9 @@ export function OrganisationPage() {
         <>
           <NameForm key={current.data.name} name={current.data.name} canManage={canManage} createdAt={current.data.created_at} />
           <MfaPolicy required={current.data.mfa_required} canManage={canManage} youHaveMfa={workspace.user?.mfaEnabled ?? false} />
+          <SsoPanel canManage={canManage} />
+          <RetentionPanel canManage={canManage} />
+          <ExportPanel canManage={canManage} />
         </>
       )}
     </PageContainer>

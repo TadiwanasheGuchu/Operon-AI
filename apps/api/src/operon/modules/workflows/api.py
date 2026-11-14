@@ -5,6 +5,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, Query, Request, status
 
 from operon.access.context import TenantContext
 from operon.access.dependencies import MetaDep, require_permission
+from operon.core import usage_limits as usage
 from operon.core.deps import SessionDep
 from operon.modules.intelligence.schemas import PersonOut
 from operon.modules.organisations.service import Person, people
@@ -174,6 +175,7 @@ async def submit(
     background: BackgroundTasks,
     meta: MetaDep,
 ) -> ExecutionDetail:
+    await usage.hit(request, usage.PURCHASE_REQUESTS_PER_USER, ctx.user_id)
     e = await service.submit_from_insight(
         session, ctx, insight_id=body.insight_id, quantity=body.quantity, note=body.note, meta=meta
     )

@@ -1,0 +1,64 @@
+name: Deploy staging
+
+# One pipeline to staging: after images are released from main (or on demand with a version),
+# run infrastructure/deployment/deploy.sh against the staging Docker host over SSH.
+#
+# Repository settings needed (environment "staging"):
+#   secrets  STAGING_SSH_KEY      private key for the deploy user
+#            STAGING_ENV_FILE     contents of staging.env (see infrastructure/deployment/env.example)
+#            GHCR_READ_TOKEN      token with read:packages, used by the host to pull images
+#   vars     STAGING_SSH_HOST     e.g. deploy@staging.example.com
+#            STAGING_KNOWN_HOSTS  output of `ssh-keyscan <host>`
+#            OPERON_DOMAIN, ACME_EMAIL
+on:
+  workflow_run:
+    workflows: ["Release images"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Image tag (12-character commit SHA). Defaults to the latest main build.
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - name: SSH access
+        run: |
+          install -m 700 -d ~/.ssh
+          echo "${{ secrets.STAGING_SSH_KEY }}" > ~/.ssh/id_deploy && chmod 600 ~/.ssh/id_deploy
+          echo "${{ vars.STAGING_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          printf 'Host *\n  IdentityFile ~/.ssh/id_deploy\n  IdentitiesOnly yes\n' > ~/.ssh/config
+      - name: Environment file
+        run: |
+          install -m 700 -d infrastructure/deployment/envs
+          printf '%s\n' "${{ secrets.STAGING_ENV_FILE }}" > infrastructure/deployment/envs/staging.env
+      - name: Registry login on the host
+        env:
+          DOCKER_HOST: ssh://${{ vars.STAGING_SSH_HOST }}
+        run: echo "${{ secrets.GHCR_READ_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+      - name: Deploy
+        env:
+          DOCKER_HOST: ssh://${{ vars.STAGING_SSH_HOST }}
+          OPERON_IMAGE_OWNER: ${{ github.repository_owner }}
+          OPERON_DOMAIN: ${{ vars.OPERON_DOMAIN }}
+          ACME_EMAIL: ${{ vars.ACME_EMAIL }}
+        run: |
+          version="${{ inputs.version }}"
+          [ -n "$version" ] || version="$(git rev-parse --short=12 HEAD)"
+          OPERON_IMAGE_OWNER="$(echo "$OPERON_IMAGE_OWNER" | tr '[:upper:]' '[:lower:]')" \
+            infrastructure/deployment/deploy.sh staging "$version"

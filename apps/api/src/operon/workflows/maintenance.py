@@ -13,13 +13,15 @@ from temporalio.common import RetryPolicy
 with workflow.unsafe.imports_passed_through():
     from uuid import UUID
 
-    from operon.modules.agents.service import run_due_agents
+    from operon.modules.agents.service import fail_stale_runs, run_due_agents
+    from operon.modules.governance.service import apply_retention
     from operon.modules.incidents.service import escalate_overdue
     from operon.modules.intelligence.engine import IntelligenceRuntime, run_detection
 
 DETECT_ACTIVITY = "run_detection"
 ESCALATE_ACTIVITY = "escalate_incidents"
 AGENTS_ACTIVITY = "run_due_agents"
+HOUSEKEEPING_ACTIVITY = "housekeeping"
 MAINTENANCE_SCHEDULE_ID = "operon-maintenance"
 MAINTENANCE_WORKFLOW_ID = "operon-maintenance-run"
 
@@ -43,6 +45,11 @@ class IntelligenceActivities:
     async def escalate(self) -> int:
         return await escalate_overdue(self.rt.db)
 
+    @activity.defn(name=HOUSEKEEPING_ACTIVITY)
+    async def housekeeping(self) -> dict[str, int]:
+        stale = await fail_stale_runs(self.rt.db)
+        return {"stale_runs": stale, **await apply_retention(self.rt.db)}
+
     @activity.defn(name=AGENTS_ACTIVITY)
     async def run_agents(self) -> int:
         return await run_due_agents(self.rt.db, self.rt.providers)
@@ -65,5 +72,10 @@ class MaintenanceWorkflow:
             AGENTS_ACTIVITY,
             start_to_close_timeout=timedelta(minutes=30),
             retry_policy=RetryPolicy(maximum_attempts=1),
+        )
+        await workflow.execute_activity(
+            HOUSEKEEPING_ACTIVITY,
+            start_to_close_timeout=timedelta(minutes=30),
+            retry_policy=RetryPolicy(maximum_attempts=2),
         )
         return escalated

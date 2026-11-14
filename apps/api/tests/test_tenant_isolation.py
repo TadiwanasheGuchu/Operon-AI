@@ -43,6 +43,7 @@ NON_TENANT = {
     ("GET", "/api/v1/invitations/lookup"),
     ("POST", "/api/v1/webhooks/{public_id}"),
     ("POST", "/api/v1/invitations/accept"),
+    ("POST", "/api/v1/auth/sso/start"),
 }
 
 # Valid bodies, so requests fail on tenancy rather than validation.
@@ -69,6 +70,19 @@ BODIES: dict[tuple[str, str], dict[str, Any]] = {
         "question": "Show me everything",
         "conversation_id": "{conversation_id}",
     },
+    ("PUT", "/api/v1/organisations/current/retention"): {
+        "audit_days": 365,
+        "conversation_days": 7,
+        "run_log_days": 30,
+        "sync_job_days": 7,
+    },
+    ("PUT", "/api/v1/organisations/current/sso"): {
+        "issuer": "https://idp.example",
+        "client_id": "spy",
+        "client_secret": "spy",
+        "enabled": False,
+    },
+    ("POST", "/api/v1/organisations/current/sso/domains"): {"domain": "spy.example"},
     ("PUT", "/api/v1/agents/inventory-replenishment"): {
         "enabled": False,
         "schedule": "off",
@@ -142,6 +156,10 @@ TENANT_TABLES = [
     "assistant_messages",
     "agent_executions",
     "agent_execution_steps",
+    "data_retention_policies",
+    "sso_connections",
+    "sso_domains",
+    "user_identities",
 ]
 # Path parameters that are static names rather than another organisation's records.
 STATIC_PARAMS = {"kind", "rule_id"}
@@ -223,6 +241,21 @@ async def world(api: Api, second_api: Api) -> World:
     )
     await second_api.post("/agents/inventory-replenishment/runs")
     agent_run = (await second_api.get("/agents/runs")).json()[0]
+    # Single sign-on configuration with a claimed domain, and a retention policy.
+    await second_api.put(
+        "/organisations/current/sso",
+        json={
+            "issuer": "https://idp.example",
+            "client_id": "b-client",
+            "client_secret": "b-secret",
+            "enabled": False,
+        },
+    )
+    await second_api.post("/organisations/current/sso/domains", json={"domain": "b-corp.example"})
+    await second_api.put(
+        "/organisations/current/retention",
+        json={"audit_days": 900, "conversation_days": 60, "run_log_days": 90, "sync_job_days": 30},
+    )
     return World(
         api,
         second_api,
@@ -242,6 +275,7 @@ async def world(api: Api, second_api: Api) -> World:
             "approval_id": pr["approvals"][0]["id"],
             "conversation_id": answer["conversation_id"],
             "run_id": agent_run["id"],
+            "domain": "b-corp.example",
         },
     )
 
@@ -289,6 +323,7 @@ async def test_every_route_is_classified(api: Api) -> None:
                 "approval_id",
                 "conversation_id",
                 "run_id",
+                "domain",
             }, f"Add a B resource id for {name}"
 
 
@@ -349,6 +384,12 @@ async def test_foreign_resource_ids_inside_own_organisation(world: World) -> Non
     assert len(conv["messages"]) == 2
     agent = (await world.b.get("/agents/inventory-replenishment")).json()
     assert agent["enabled"] is True
+    sso = (await world.b.get("/organisations/current/sso")).json()
+    assert (sso["client_id"], [d["domain"] for d in sso["domains"]]) == (
+        "b-client",
+        ["b-corp.example"],
+    )
+    assert (await world.b.get("/organisations/current/retention")).json()["audit_days"] == 900
 
 
 async def test_lists_never_contain_foreign_rows(world: World) -> None:

@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 
 from operon.access.context import TenantContext
 from operon.access.dependencies import MetaDep, require_permission
+from operon.core import usage_limits as usage
 from operon.core.deps import DatabaseDep, SessionDep
 from operon.core.errors import ApiError
 from operon.modules.agents import service
@@ -210,6 +211,8 @@ async def assistant_status(ctx: Assistant, session: SessionDep, request: Request
 async def ask(
     body: AskRequest, ctx: Assistant, db: DatabaseDep, request: Request, meta: MetaDep
 ) -> AskResponse:
+    await usage.hit(request, usage.ASSISTANT_PER_USER, ctx.user_id)
+    await usage.hit(request, usage.ASSISTANT_PER_ORG, ctx.organisation_id)
     answer = await service.ask(
         db,
         registry(request),
@@ -317,6 +320,7 @@ async def start_run(
     ctx: AgentsRun, db: DatabaseDep, request: Request, background: BackgroundTasks
 ) -> dict[str, str]:
     reg = registry(request)
+    await usage.hit(request, usage.AGENT_RUNS_PER_ORG, ctx.organisation_id)
     # Validate now so the caller sees why a run can't start; run after the response.
     prepared = await service.prepare_run(
         db, reg, ctx.organisation_id, trigger="manual", triggered_by=ctx.user_id

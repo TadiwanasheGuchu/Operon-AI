@@ -13,6 +13,7 @@ from operon.core.config import get_settings
 from operon.core.crypto import SecretBox
 from operon.core.db import Database
 from operon.core.logging import configure_logging, get_logger
+from operon.core.telemetry import configure_telemetry
 from operon.modules.ai.service import ProviderRegistry
 from operon.modules.integrations.sync import SyncRuntime, default_http_factory
 from operon.modules.intelligence.engine import IntelligenceRuntime
@@ -58,6 +59,7 @@ async def main() -> None:
     configure_logging(settings.log_level, settings.log_json)
     log = get_logger("operon.worker")
     db = Database(settings)
+    configure_telemetry(settings, engine=db.engine)
     runtime = SyncRuntime(
         db=db,
         settings=settings,
@@ -80,6 +82,7 @@ async def main() -> None:
             intelligence.detect,
             intelligence.escalate,
             intelligence.run_agents,
+            intelligence.housekeeping,
             purchase.advance_execution,
         ],
     )

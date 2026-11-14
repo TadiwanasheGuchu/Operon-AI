@@ -7,6 +7,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, FastAPI
 
+from operon.core.body_limit import BodyLimitMiddleware
 from operon.core.config import Settings, get_settings
 from operon.core.crypto import SecretBox
 from operon.core.csrf import CsrfMiddleware
@@ -17,11 +18,14 @@ from operon.core.logging import configure_logging, get_logger
 from operon.core.redis import create_redis
 from operon.core.request_context import RequestContextMiddleware
 from operon.core.security import PasswordService
+from operon.core.telemetry import configure_telemetry
 from operon.modules.agents.api import router as agents_router
-from operon.modules.agents.service import run_due_agents
+from operon.modules.agents.service import fail_stale_runs, run_due_agents
 from operon.modules.ai.service import ProviderRegistry
 from operon.modules.audit.api import router as audit_router
 from operon.modules.dashboard.api import router as dashboard_router
+from operon.modules.governance.api import router as governance_router
+from operon.modules.governance.service import apply_retention
 from operon.modules.health.api import router as health_router
 from operon.modules.identity.api import router as identity_router
 from operon.modules.incidents.api import router as incidents_router
@@ -35,6 +39,7 @@ from operon.modules.intelligence.engine import IntelligenceRuntime, run_detectio
 from operon.modules.notifications.api import router as notifications_router
 from operon.modules.organisations.api import router as organisations_router
 from operon.modules.permissions.api import router as permissions_router
+from operon.modules.sso.api import router as sso_router
 from operon.modules.workflows.api import router as workflows_router
 from operon.modules.workflows.dispatch import create_workflow_dispatcher
 from operon.modules.workflows.engine import WorkflowRuntime
@@ -54,6 +59,8 @@ async def _inline_maintenance(
             await escalate_overdue(rt.db)
             await workflow_sweep(rt)
             await run_due_agents(rt.db, providers)
+            await fail_stale_runs(rt.db)
+            await apply_retention(rt.db)
         except Exception:
             log.exception("inline_maintenance_failed")
 
@@ -67,6 +74,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         app.state.settings = settings
         app.state.db = Database(settings)
+        configure_telemetry(settings, engine=app.state.db.engine)
         app.state.redis = create_redis(settings)
         app.state.passwords = PasswordService(settings)
         app.state.secret_box = SecretBox(settings.secret_keys.get_secret_value())
@@ -122,8 +130,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     # Last added = outermost: request IDs exist before CSRF can reject a request.
     app.add_middleware(CsrfMiddleware, settings=settings)
+    app.add_middleware(BodyLimitMiddleware, settings=settings)
     app.add_middleware(RequestContextMiddleware)
     register_error_handlers(app)
+    configure_telemetry(settings, app=app)
 
     v1 = APIRouter(prefix=API_PREFIX)
     v1.include_router(health_router)
@@ -138,6 +148,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     v1.include_router(incidents_router)
     v1.include_router(workflows_router)
     v1.include_router(agents_router)
+    v1.include_router(governance_router)
+    v1.include_router(sso_router)
     v1.include_router(webhooks_router)
     app.include_router(v1)
     return app

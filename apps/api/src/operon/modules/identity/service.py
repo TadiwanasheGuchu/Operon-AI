@@ -15,13 +15,13 @@ from uuid import UUID
 
 import pyotp
 from redis.asyncio import Redis
-from sqlalchemy import select, update
+from sqlalchemy import select, text, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from operon.access.context import Actor, AuthContext, RequestMeta
 from operon.core.config import Settings
 from operon.core.crypto import SecretBox
-from operon.core.db import Database
+from operon.core.db import Database, set_rls_context
 from operon.core.email import EmailMessage, EmailSender
 from operon.core.errors import ApiError
 from operon.core.rate_limit import Limit, RateLimiter
@@ -36,6 +36,8 @@ from operon.modules.identity.models import (
     UserSession,
 )
 from operon.modules.organisations import service as orgs
+from operon.modules.organisations.models import Membership
+from operon.modules.permissions.models import Role
 
 LOGIN_PER_IP = Limit("login_ip", 30, 15 * 60)
 LOGIN_PER_EMAIL = Limit("login_email", 8, 15 * 60)
@@ -172,7 +174,32 @@ class IdentityService:
         result = await self.s.execute(stmt)
         return int(getattr(result, "rowcount", 0) or 0)
 
-    async def _create_session(self, user: User) -> IssuedSession:
+    async def issue_sso_session(self, user: User) -> IssuedSession:
+        """A session for someone their organisation's identity provider just authenticated."""
+        return await self._create_session(user, method="sso")
+
+    async def _sso_required(self, email: str, user: User | None) -> bool:
+        """Password sign-in is refused for verified domains whose organisation requires SSO,
+        except for that organisation's owners (break-glass if the identity provider is down)."""
+        row = (
+            await self.s.execute(
+                text("SELECT organisation_id, enforce FROM operon_sso_for_domain(:d)"),
+                {"d": email.rsplit("@", 1)[-1].lower()},
+            )
+        ).first()
+        if row is None or not row[1]:
+            return False
+        if user is None:
+            return True
+        await set_rls_context(self.s, user_id=user.id, organisation_id=row[0])
+        role = await self.s.scalar(
+            select(Role.key)
+            .join(Membership, Membership.role_id == Role.id)
+            .where(Membership.organisation_id == row[0], Membership.user_id == user.id)
+        )
+        return role != "owner"
+
+    async def _create_session(self, user: User, method: str = "password") -> IssuedSession:
         token = new_token()
         now = _now()
         record = UserSession(
@@ -194,6 +221,7 @@ class IdentityService:
             meta=self.meta,
             target_type="session",
             target_id=record.id,
+            details={"method": method},
         )
         return IssuedSession(token, record)
 
@@ -346,6 +374,12 @@ class IdentityService:
         await self.limiter.hit(LOGIN_PER_EMAIL, email.lower())
 
         user = await self._user_by_email(email)
+        if await self._sso_required(email, user):
+            raise ApiError(
+                403,
+                "sso_required",
+                "Your organisation signs in with single sign-on. Use “Sign in with SSO”.",
+            )
         credential = await self.s.get(UserCredential, user.id) if user else None
         valid = self.passwords.verify(credential.password_hash if credential else None, password)
         if user is None or credential is None or not valid or not user.is_active:

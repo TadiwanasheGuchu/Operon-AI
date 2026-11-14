@@ -1,0 +1,16 @@
+# TLS with automatic certificates; everything goes to the web app, which proxies /api.
+{
+	email {$ACME_EMAIL}
+}
+
+{$OPERON_DOMAIN} {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+	}
+	# The API's interactive docs are disabled in production; keep health checks internal.
+	@health path /api/v1/health/*
+	respond @health 404
+	reverse_proxy web:3000
+}

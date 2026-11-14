@@ -92,7 +92,42 @@ This is the primary acceptance demonstration. The calculation is deterministic a
 | 4 — Intelligence and incidents | Done; Odoo-sourced live data and live AI providers not yet verified (see below) |
 | 5 — Workflow automation | Done; live Odoo and the Temporal runtime not yet verified (see below) |
 | 6 — AI assistant and first agent | Done with a scripted model; real-model evaluation pending a provider key |
-| 7 — Enterprise readiness | Next |
+| 7 — Enterprise readiness | Done in code; staging deploy, PITR drill on managed Postgres and an external penetration test need the hosting decision |
+
+Phase 7 notes (ADR 0015):
+- Built:
+  - **Security review and threat model** (`docs/security/threat-model.md`). Fixed:
+    - DNS rebinding SSRF (connect-time address pinning);
+    - SSO login CSRF;
+    - usage limits on costly actions;
+    - a request body cap;
+    - CSP and HSTS;
+    - stale agent runs.
+  - **OIDC single sign-on:** PKCE, nonce, DNS-verified domains, JIT provisioning, "require SSO"
+    with an owner break-glass.
+  - **Retention** per organisation, with database-enforced minimums, plus a ZIP export.
+  - **OpenTelemetry** traces and metrics, and trace ids in logs.
+  - **Recovery:** checksummed, verified logical backups and a restore drill.
+  - **Load test script;** bulk ingest about 5× faster.
+  - **Deployment:** GHCR release, a production compose file with Caddy TLS, `deploy.sh` with a
+    health gate and automatic rollback, and a staging pipeline.
+  - **Web:** SSO, retention and export settings; "Sign in with SSO".
+  - **Guides:** onboarding (`docs/guides/onboarding.md`), administration, and operations runbooks
+    (`docs/operations/`).
+- Acceptance status:
+  - **Documented restore within RPO/RTO:** targets RPO ≤ 5 min (PITR) and RTO ≤ 1 h. Logical
+    restore drill passed: 397 MB restored and verified in 10 s. The PITR drill runs on the
+    managed database once hosting is chosen.
+  - **Zero high/critical findings open:** yes, by internal review (one high fixed). The external
+    penetration test is still to do.
+  - **Staging deploy is one command or pipeline:** `deploy.sh staging <sha>` and the
+    `Deploy staging` workflow. They need a host and secrets; not yet run against a real host.
+  - **Onboarding guide to first insights without engineering:** written against the actual
+    screens and messages. Live Odoo still unverified (no sandbox).
+  - **Load: 50 orgs × 10k SKUs:** measured at 3 × 10k; 50 is extrapolated (see
+    `docs/operations/load-testing.md`).
+- Deferred: cloud-specific IaC, KMS-wrapped keys, SCIM/SAML, CSP nonces, breached-password
+  check.
 
 Phase 6 notes (ADR 0014):
 - Built:

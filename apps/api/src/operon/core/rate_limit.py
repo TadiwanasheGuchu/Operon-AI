@@ -20,6 +20,7 @@ class Limit:
     name: str
     max_hits: int
     window_seconds: int
+    message: str = "Too many attempts. Try again later."
 
 
 class RateLimiter:
@@ -43,7 +44,7 @@ class RateLimiter:
             raise ApiError(
                 429,
                 "rate_limited",
-                "Too many attempts. Try again later.",
+                limit.message,
                 {"retry_after_seconds": max(int(ttl), 1)},
             )
 

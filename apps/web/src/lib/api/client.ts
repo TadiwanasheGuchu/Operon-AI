@@ -53,13 +53,15 @@ export interface RequestOptions {
   tenant?: boolean;
   /** Return the body as text (e.g. CSV) instead of parsing JSON. */
   text?: boolean;
+  /** Return the body as a Blob (file downloads). */
+  blob?: boolean;
   signal?: AbortSignal;
 }
 
 export async function apiRequest<T = unknown>(
   method: string,
   path: string,
-  { body, form, tenant = true, signal, text = false }: RequestOptions = {},
+  { body, form, tenant = true, signal, text = false, blob = false }: RequestOptions = {},
 ): Promise<T> {
   const headers: Record<string, string> = { Accept: "application/json" };
   if (body !== undefined) headers["Content-Type"] = "application/json";
@@ -84,6 +86,7 @@ export async function apiRequest<T = unknown>(
   }
   if (response.status === 204) return undefined as T;
   if (text && response.ok) return (await response.text()) as T;
+  if (blob && response.ok) return (await response.blob()) as T;
   const payload: unknown = await response.json().catch(() => null);
   if (!response.ok) {
     const envelope = (payload ?? {}) as ErrorEnvelope;

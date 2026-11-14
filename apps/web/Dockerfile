@@ -11,7 +11,11 @@ RUN pnpm install --frozen-lockfile --filter @operon/web...
 
 FROM deps AS build
 ARG NEXT_PUBLIC_OPERON_DATA_SOURCE=api
-ENV NEXT_PUBLIC_OPERON_DATA_SOURCE=$NEXT_PUBLIC_OPERON_DATA_SOURCE NEXT_TELEMETRY_DISABLED=1
+# The /api proxy target is fixed when the app is built (Next.js serialises rewrites), so it is a
+# build argument. The default is the API's service name inside Compose or Kubernetes.
+ARG OPERON_API_ORIGIN=http://api:8000
+ENV NEXT_PUBLIC_OPERON_DATA_SOURCE=$NEXT_PUBLIC_OPERON_DATA_SOURCE NEXT_TELEMETRY_DISABLED=1 \
+    OPERON_API_ORIGIN=$OPERON_API_ORIGIN
 COPY apps/web apps/web
 RUN pnpm --filter @operon/web build
 
